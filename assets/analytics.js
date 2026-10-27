@@ -16,8 +16,8 @@
   'use strict';
 
   // ---- settings: paste IDs here; an empty ID simply skips that tool ----
-  var CLARITY_ID = '';   // Microsoft Clarity project ID, e.g. 'abcd1234ef'
-  var GA4_ID = '';       // Google Analytics 4 measurement ID, e.g. 'G-XXXXXXXXXX'
+  var CLARITY_ID = 'z4fgw3ibez';   // Microsoft Clarity project ID, e.g. 'abcd1234ef'
+  var GA4_ID = 'G-6RM7V15QNS';       // Google Analytics 4 measurement ID, e.g. 'G-XXXXXXXXXX'
 
   var CASES = {
     'cruise-control': 'Intelligent Cruise Control',
