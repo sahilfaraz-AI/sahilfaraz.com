@@ -3647,6 +3647,11 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
 @keyframes tread { to { background-position: -160px 0; } }
 @media (prefers-reduced-motion: reduce) { .curtain__tread::before, .curtain__tread::after { animation: none; } }
 
+/* TechText sets an inline position: relative on its host; keep the host pinned to the name box
+   so the canvas can never size the box it is measured from */
+.hero__tech { position: absolute !important; inset: 0; overflow: hidden; }
+.hero__tech .tech-text-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+
 
 /* ==========================================================================
    MySleepyTale V4: ideation wall, vote tiers, disagreements, paper vs live,
@@ -9761,6 +9766,8 @@ window.TechText = (container, props = {}) => {
         bounce: 0.45
       });
       if (tt) techHost.closest('.hero__name').classList.add('has-techtext');
+      // re-measure whenever home is shown again (it may have mounted while hidden)
+      P.Case.onShow.push((n) => { if (n === 'home') requestAnimationFrame(() => window.dispatchEvent(new Event('resize'))); });
     };
     if (document.fonts && document.fonts.load) {
       Promise.race([document.fonts.load('800 100px "Cabinet Grotesk"'), P.wait(1200)]).then(start, start);
