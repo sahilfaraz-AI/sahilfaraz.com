@@ -7,7 +7,7 @@
 <meta name="description" content="Sahil Faraz is a product designer in Toronto with ten years of design, user research and testing across automotive, games, mobile and web. Case studies: Intelligent Cruise Control, CoDesigner, MySleepyTale, Research Alerts and Aug-Fice.">
 <meta name="author" content="Sahil Faraz">
 <meta name="theme-color" content="#13140E">
-<meta name="generator" content="sahilfaraz.com V10">
+<meta name="generator" content="sahilfaraz.com V11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2313140E'/%3E%3Cpath d='M12 24V12h12M40 12h12v12M52 40v12H40M24 52H12V40' fill='none' stroke='%23F4F3E8' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23EBFC72'/%3E%3C/svg%3E">
 <script>document.documentElement.classList.replace('no-js','js');</script>
 <style>
@@ -3804,6 +3804,27 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
 
 .js .hero__intro { opacity: 1; transform: none; }
 
+
+/* ---------- tire tread kit (progress bar + next project) ---------- */
+:root{--tread-prog:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Crect%20width%3D%2212%22%20height%3D%2212%22%20fill%3D%22%231E3315%22/%3E%3Cg%20fill%3D%22%238BE36A%22%3E%3Cpath%20d%3D%22M1.5%201H7.5L6%205H0Z%22/%3E%3Cpath%20d%3D%22M4.5%207H10.5L12%2011H6Z%22/%3E%3C/g%3E%3C/svg%3E");--tread-trail:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2226%22%20height%3D%2228%22%20viewBox%3D%220%200%2026%2028%22%3E%3Cg%20fill%3D%22%230D0E09%22%20fill-opacity%3D%22.32%22%3E%3Cpath%20d%3D%22M2%202H13L10%2012H-1Z%22/%3E%3Cpath%20d%3D%22M15%202H26L23%2012H12Z%22%20fill-opacity%3D%220%22/%3E%3Cpath%20d%3D%22M8%2016H19L22%2026H11Z%22/%3E%3C/g%3E%3C/svg%3E")}
+.tread-host{position:relative;overflow:hidden;isolation:isolate}
+.tread-host::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--tread-fill,var(--accent-hi,#EBFC72));clip-path:inset(0 100% 0 0);transition:clip-path 1.15s cubic-bezier(.7,0,.2,1)}
+.tread-host:hover::after,.tread-host:focus-visible::after{clip-path:inset(0 0 0 0)}
+.tread-trail{position:absolute;left:0;right:0;bottom:0;height:20px;z-index:0;pointer-events:none;background:var(--tread-trail) repeat-x 0 100%/20px 22px;clip-path:inset(0 100% 0 0);transition:clip-path 1.15s cubic-bezier(.7,0,.2,1)}
+.tread-host:hover .tread-trail,.tread-host:focus-visible .tread-trail{clip-path:inset(0 0 0 0)}
+.tread-tire{position:absolute;bottom:2px;left:-34px;width:68px;height:68px;margin-left:-34px;z-index:1;pointer-events:none;opacity:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.tread-tire svg{width:100%;height:100%;display:block}
+.tread-host:hover .tread-tire,.tread-host:focus-visible .tread-tire{animation:treadRoll 1.15s cubic-bezier(.7,0,.2,1) forwards}
+.tread-host:hover .tread-wheel,.tread-host:focus-visible .tread-wheel{animation:treadSpin 1.15s cubic-bezier(.7,0,.2,1) forwards}
+@keyframes treadRoll{0%{left:0;opacity:1;transform:translateY(0)}12%{transform:translateY(-3px)}24%{transform:translateY(0)}88%{opacity:1}100%{left:calc(100% + 40px);opacity:0}}
+@keyframes treadSpin{to{transform:rotate(1980deg)}}
+@media (prefers-reduced-motion:reduce){.tread-host::after,.tread-trail{transition:none}.tread-tire{display:none}}
+[data-theme="mst"].cs-nextproj.tread-host:hover{color:#fff}
+[data-theme="mst"] .tread-trail{filter:invert(1)}
+
+.read-progress{height:12px;bottom:-12px}
+.read-progress span{transform:none!important;background:var(--tread-prog) repeat-x 0 0/12px 12px;clip-path:inset(0 100% 0 0)}
+.cs-nextproj.tread-host{overflow:hidden}
 </style>
 <script src="assets/analytics.js" defer></script>
 </head>
@@ -5161,10 +5182,10 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
     </div>
   </div>
 
-  <a class="cs-nextproj" href="#/mysleepytale" data-theme="mst" data-cursor="Next case study">
+  <a class="cs-nextproj tread-host" href="#/mysleepytale" data-theme="mst" data-cursor="Next case study">
     <span class="cs-nextproj__k">Next case study</span>
     <span class="cs-nextproj__t">MySleepyTale</span>
-    <span class="cs-nextproj__d">From a sketchbook to a live AI product, with parents at every step.</span>
+    <span class="cs-nextproj__d">From a sketchbook to a live AI product, with parents at every step.</span><span class="tread-trail" aria-hidden="true"></span><span class="tread-tire" aria-hidden="true"><svg class="tread-wheel" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="31" fill="#0D0E09"/><g fill="#2A2D24"><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(0.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(20.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(40.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(60.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(80.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(100.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(120.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(140.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(160.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(180.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(200.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(220.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(240.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(260.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(280.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(300.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(320.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(340.0)"/></g><circle r="22" fill="none" stroke="#2A2D24" stroke-width="2"/><circle r="17.5" fill="#C9C8BB"/><circle r="15.5" fill="#8E8D82"/><g fill="#0D0E09"><circle cx="0.00" cy="-10.00" r="2.3"/><circle cx="9.51" cy="-3.09" r="2.3"/><circle cx="5.88" cy="8.09" r="2.3"/><circle cx="-5.88" cy="8.09" r="2.3"/><circle cx="-9.51" cy="-3.09" r="2.3"/></g><circle r="4.2" fill="#EBFC72"/></svg></span>
   </a>
 </article>
 </div>
@@ -5659,10 +5680,10 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
     </div>
   </div>
 
-  <a class="cs-nextproj" href="#/research-alerts" data-theme="ra" data-cursor="Next case study">
+  <a class="cs-nextproj tread-host" href="#/research-alerts" data-theme="ra" data-cursor="Next case study">
     <span class="cs-nextproj__k">Next case study</span>
     <span class="cs-nextproj__t">Research Alerts</span>
-    <span class="cs-nextproj__d">A university&rsquo;s research alerts, redesigned around the inbox.</span>
+    <span class="cs-nextproj__d">A university&rsquo;s research alerts, redesigned around the inbox.</span><span class="tread-trail" aria-hidden="true"></span><span class="tread-tire" aria-hidden="true"><svg class="tread-wheel" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="31" fill="#0D0E09"/><g fill="#2A2D24"><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(0.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(20.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(40.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(60.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(80.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(100.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(120.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(140.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(160.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(180.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(200.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(220.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(240.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(260.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(280.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(300.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(320.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(340.0)"/></g><circle r="22" fill="none" stroke="#2A2D24" stroke-width="2"/><circle r="17.5" fill="#C9C8BB"/><circle r="15.5" fill="#8E8D82"/><g fill="#0D0E09"><circle cx="0.00" cy="-10.00" r="2.3"/><circle cx="9.51" cy="-3.09" r="2.3"/><circle cx="5.88" cy="8.09" r="2.3"/><circle cx="-5.88" cy="8.09" r="2.3"/><circle cx="-9.51" cy="-3.09" r="2.3"/></g><circle r="4.2" fill="#EBFC72"/></svg></span>
   </a>
 </article>
 </div>
@@ -6076,10 +6097,10 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
     </div>
   </div>
 
-  <a class="cs-nextproj" href="#/aug-fice" data-theme="af" data-cursor="Next case study">
+  <a class="cs-nextproj tread-host" href="#/aug-fice" data-theme="af" data-cursor="Next case study">
     <span class="cs-nextproj__k">Next case study</span>
     <span class="cs-nextproj__t">Aug-Fice</span>
-    <span class="cs-nextproj__d">A quiet office you can wear: focus in mixed reality.</span>
+    <span class="cs-nextproj__d">A quiet office you can wear: focus in mixed reality.</span><span class="tread-trail" aria-hidden="true"></span><span class="tread-tire" aria-hidden="true"><svg class="tread-wheel" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="31" fill="#0D0E09"/><g fill="#2A2D24"><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(0.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(20.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(40.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(60.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(80.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(100.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(120.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(140.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(160.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(180.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(200.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(220.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(240.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(260.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(280.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(300.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(320.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(340.0)"/></g><circle r="22" fill="none" stroke="#2A2D24" stroke-width="2"/><circle r="17.5" fill="#C9C8BB"/><circle r="15.5" fill="#8E8D82"/><g fill="#0D0E09"><circle cx="0.00" cy="-10.00" r="2.3"/><circle cx="9.51" cy="-3.09" r="2.3"/><circle cx="5.88" cy="8.09" r="2.3"/><circle cx="-5.88" cy="8.09" r="2.3"/><circle cx="-9.51" cy="-3.09" r="2.3"/></g><circle r="4.2" fill="#EBFC72"/></svg></span>
   </a>
 </article>
 </div>
@@ -6463,10 +6484,10 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
     </div>
   </div>
 
-  <a class="cs-nextproj" href="#/cruise-control" data-theme="icc" data-cursor="Next case study">
+  <a class="cs-nextproj tread-host" href="#/cruise-control" data-theme="icc" data-cursor="Next case study">
     <span class="cs-nextproj__k">Next case study</span>
     <span class="cs-nextproj__t">Intelligent Cruise Control</span>
-    <span class="cs-nextproj__d">Cruise control that adopts the legal limit, with the driver in charge.</span>
+    <span class="cs-nextproj__d">Cruise control that adopts the legal limit, with the driver in charge.</span><span class="tread-trail" aria-hidden="true"></span><span class="tread-tire" aria-hidden="true"><svg class="tread-wheel" viewBox="-32 -32 64 64" aria-hidden="true"><circle r="31" fill="#0D0E09"/><g fill="#2A2D24"><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(0.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(20.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(40.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(60.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(80.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(100.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(120.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(140.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(160.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(180.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(200.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(220.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(240.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(260.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(280.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(300.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(320.0)"/><rect x="-3.2" y="-31" width="6.4" height="7" rx="1.2" transform="rotate(340.0)"/></g><circle r="22" fill="none" stroke="#2A2D24" stroke-width="2"/><circle r="17.5" fill="#C9C8BB"/><circle r="15.5" fill="#8E8D82"/><g fill="#0D0E09"><circle cx="0.00" cy="-10.00" r="2.3"/><circle cx="9.51" cy="-3.09" r="2.3"/><circle cx="5.88" cy="8.09" r="2.3"/><circle cx="-5.88" cy="8.09" r="2.3"/><circle cx="-9.51" cy="-3.09" r="2.3"/></g><circle r="4.2" fill="#EBFC72"/></svg></span>
   </a>
 </article>
 </div>
@@ -7616,7 +7637,7 @@ window.TechText = (container, props = {}) => {
     header.classList.toggle('is-solid', window.scrollY > 8);
     if (body.dataset.routeKind === 'case' && progressBar) {
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      progressBar.style.transform = `scaleX(${max > 0 ? clamp(window.scrollY / max, 0, 1) : 0})`;
+      progressBar.style.clipPath = `inset(0 ${(1 - (max > 0 ? clamp(window.scrollY / max, 0, 1) : 0)) * 100}% 0 0)`;
     }
   };
   window.addEventListener('scroll', updateHeader, { passive: true });
