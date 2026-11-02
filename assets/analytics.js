@@ -8,6 +8,7 @@
   Everything is wrapped so a blocked or failing tracker can never break the site.
 
   Handy links:
+    /lyft            short link for Lyft (redirects to /?utm_source=lyft...)
     ?ref=lyft        tag a visit with where the link was shared (one link per application)
     ?notrack=1       stop tracking this browser (use on your own devices)
     ?notrack=0       start tracking this browser again
@@ -88,11 +89,22 @@
 
   // ---- routes: one virtual page per case study (and per mode) ----
   function route() {
+    if (/intelligent-cruise-control/.test(location.pathname)) {
+      var locked = document.body && document.body.classList.contains('locked');
+      return { page: 'cruise-control', mode: locked ? 'locked' : 'unlocked' };
+    }
     var h = (location.hash || '').replace(/^#\/?/, '');
     var parts = h.split('/');
     if (CASES[parts[0]]) return { page: parts[0], mode: parts[1] === 'deep-dive' ? 'deep-dive' : 'highlights' };
     return { page: 'home', mode: '' };
   }
+
+  var campaignQuery = '';
+  try {
+    var cq = new URLSearchParams();
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (k) { var v = params.get(k); if (v) cq.set(k, v); });
+    campaignQuery = cq.toString() ? '?' + cq.toString() : '';
+  } catch (e) { /* ignore */ }
 
   var lastKey = '';
   var pageStart = Date.now();
@@ -113,10 +125,13 @@
     lastKey = key;
     lastPage = r.page;
 
-    var path = r.page === 'home' ? '/' : '/' + r.page + (r.mode === 'deep-dive' ? '/deep-dive' : '');
-    var title = r.page === 'home' ? 'Home' : CASES[r.page] + (r.mode === 'deep-dive' ? ' (deep dive)' : '');
+    var sub = r.mode === 'deep-dive' || r.mode === 'locked' || r.mode === 'unlocked' ? '/' + r.mode : '';
+    var path = r.page === 'home' ? '/' : '/' + r.page + sub;
+    var title = r.page === 'home' ? 'Home' : CASES[r.page] + (sub ? ' (' + r.mode.replace('-', ' ') + ')' : '');
+    // keep the campaign (utm_*) on the first hit so GA4 credits the source, e.g. Lyft
+    var q = campaignQuery; campaignQuery = '';
     gtag('event', 'page_view', {
-      page_location: location.origin + path,
+      page_location: location.origin + path + q,
       page_path: path,
       page_title: title,
       ref: ref || undefined
@@ -151,7 +166,7 @@
       });
     }), { threshold: 0.35 });
     HOME_SECTIONS.forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
-    var cs = document.querySelectorAll('.cs-sec[id]');
+    var cs = document.querySelectorAll('.cs-sec[id], main section[id]');
     for (var i = 0; i < cs.length; i++) io.observe(cs[i]);
   });
 
@@ -175,6 +190,10 @@
     var secs = Math.round((Date.now() - pageStart) / 1000);
     if (lastPage && secs > 0) gtag('event', 'page_time', { page_name: lastPage, seconds: secs, ref: ref || undefined, transport_type: 'beacon' });
   }));
+
+  // the locked case study calls these after it unlocks
+  window.sfTrack = safe(function (name, data) { track(name, data); });
+  window.sfWatch = safe(function () { onRoute(); watchSections(); });
 
   var start = safe(function () { onRoute(); watchSections(); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

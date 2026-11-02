@@ -7,7 +7,7 @@
 <meta name="description" content="Sahil Faraz is a product designer in Toronto with ten years of design, user research and testing across automotive, games, mobile and web. Case studies: Intelligent Cruise Control, CoDesigner, MySleepyTale, Research Alerts and Aug-Fice.">
 <meta name="author" content="Sahil Faraz">
 <meta name="theme-color" content="#13140E">
-<meta name="generator" content="sahilfaraz.com V7">
+<meta name="generator" content="sahilfaraz.com V8">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2313140E'/%3E%3Cpath d='M12 24V12h12M40 12h12v12M52 40v12H40M24 52H12V40' fill='none' stroke='%23F4F3E8' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23EBFC72'/%3E%3C/svg%3E">
 <script>document.documentElement.classList.replace('no-js','js');</script>
 <style>
@@ -2558,9 +2558,6 @@ body[data-route-kind="case"].show-header-toggle .site-header__center .mode-toggl
 .clu__tt path { stroke: #fff; transition: stroke .35s ease; }
 .clu.is-match .clu__tt circle { fill: #7EDB5A; }
 .clu.is-match .clu__tt path { stroke: #7EDB5A; }
-.clu__hint { display: flex; align-items: center; gap: .8cqi; font-size: 2.2cqi; font-weight: 700; color: #fff; padding: .5cqi 1.2cqi; border-radius: 99px; background: rgba(126, 219, 90, .18); box-shadow: inset 0 0 0 .2cqi #7EDB5A; opacity: 0; transform: translateY(-6px); transition: opacity .35s ease, transform .5s var(--ease-out); }
-.clu__hint b { font-size: 1.7cqi; background: #7EDB5A; color: #0a1316; padding: .1cqi .8cqi; border-radius: 99px; }
-.clu.has-diff:not(.pop-speed):not(.pop-alert) .clu__hint { opacity: 1; transform: none; }
 
 .clu__controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
 .clu__btns { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -8968,7 +8965,6 @@ window.TechText = (container, props = {}) => {
           <div class="clu__limit">${sign('clu__limitsign')}</div>
           <p class="clu__speed"><span data-speed-now>70</span></p>
           <p class="clu__set"><svg class="clu__tt" viewBox="0 0 12 20" aria-hidden="true"><circle cx="6" cy="5" r="4.2"/><path d="M6 9 V19" stroke-width="2"/></svg><span data-set>70</span> km/h</p>
-          <p class="clu__hint" data-hint><b>RES</b> <span data-hint-n>90</span></p>
         </div>
       </div>
       <div class="clu__controls">
@@ -8987,7 +8983,7 @@ window.TechText = (container, props = {}) => {
 
     const S = { limit: 70, set: 70, speed: 70, prev: null, pending: null, popup: null, queued: false, seq: [90, 70, 100, 80], k: 0, busy: false };
     const el = {
-      pop: $('[data-pop]', host), alert: $('[data-alert]', host), queue: $('[data-queue]', host), hint: $('[data-hint]', host), hintN: $('[data-hint-n]', host),
+      pop: $('[data-pop]', host), alert: $('[data-alert]', host), queue: $('[data-queue]', host), 
       now: $('[data-speed-now]', host), set: $('[data-set]', host), cap: $('[data-cap]', host),
       limitSign: $('.clu__limitsign .sign__digits', host), popSign: $('.clu__popsign .sign__digits', host), limitWrap: $('.clu__limit', host),
       roadSign: $('.clu__roadsign', host), roadSignN: $('.clu__roadsign-n', host), timer: $('.clu__timer i', host),
@@ -9017,7 +9013,6 @@ window.TechText = (container, props = {}) => {
       host.classList.toggle('has-queue', S.queued);
       host.classList.toggle('is-match', S.set === S.limit);
       host.classList.toggle('has-diff', S.set !== S.limit);
-      el.hintN.textContent = S.limit;
     };
     const ramp = () => {
       clearInterval(rampT);
@@ -9039,7 +9034,7 @@ window.TechText = (container, props = {}) => {
     };
     const offer = (n) => {
       S.limit = n;
-      el.popSign.textContent = n; el.hintN.textContent = n;
+      el.popSign.textContent = n;
       if (n === S.set) { if (S.pending != null) closeOffer(true); else draw(); say('same'); return; }
       S.pending = n;
       if (host.dataset.mode === 'launched' && S.popup !== 'alert') S.popup = 'speed';
