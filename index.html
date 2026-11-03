@@ -7,7 +7,7 @@
 <meta name="description" content="Sahil Faraz is a product designer in Toronto with ten years of design, user research and testing across automotive, games, mobile and web. Case studies: Intelligent Cruise Control, CoDesigner, MySleepyTale, Research Alerts and Aug-Fice.">
 <meta name="author" content="Sahil Faraz">
 <meta name="theme-color" content="#13140E">
-<meta name="generator" content="sahilfaraz.com V11">
+<meta name="generator" content="sahilfaraz.com V12">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2313140E'/%3E%3Cpath d='M12 24V12h12M40 12h12v12M52 40v12H40M24 52H12V40' fill='none' stroke='%23F4F3E8' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23EBFC72'/%3E%3C/svg%3E">
 <script>document.documentElement.classList.replace('no-js','js');</script>
 <style>
@@ -3805,6 +3805,12 @@ a:hover > .ic, button:hover > .ic, a:focus-visible > .ic, button:focus-visible >
 .js .hero__intro { opacity: 1; transform: none; }
 
 
+
+/* experience route: tire tread instead of dotted ruts, car heading down the trail */
+.route__ruts::before,.route__ruts::after,.route__fill::before,.route__fill::after{content:none}
+.route__ruts{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2016%22%3E%3Cg%20fill%3D%22%23F4F3E8%22%20fill-opacity%3D%22.16%22%3E%3Cpath%20d%3D%22M1%202L10%200V5L1%207Z%22/%3E%3Cpath%20d%3D%22M14%208L23%2010V15L14%2013Z%22/%3E%3C/g%3E%3C/svg%3E") repeat-y 50% 0/24px 16px}
+.route__fill{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2016%22%3E%3Cg%20fill%3D%22%23EBFC72%22%20fill-opacity%3D%221%22%3E%3Cpath%20d%3D%22M1%202L10%200V5L1%207Z%22/%3E%3Cpath%20d%3D%22M14%208L23%2010V15L14%2013Z%22/%3E%3C/g%3E%3C/svg%3E") repeat-y 50% 0/24px 16px}
+.route__rig .ic{transform:rotate(90deg)}
 /* ---------- tire tread kit (progress bar + next project) ---------- */
 :root{--tread-prog:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Crect%20width%3D%2212%22%20height%3D%2212%22%20fill%3D%22%231E3315%22/%3E%3Cg%20fill%3D%22%238BE36A%22%3E%3Cpath%20d%3D%22M1.5%201H7.5L6%205H0Z%22/%3E%3Cpath%20d%3D%22M4.5%207H10.5L12%2011H6Z%22/%3E%3C/g%3E%3C/svg%3E");--tread-trail:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2226%22%20height%3D%2228%22%20viewBox%3D%220%200%2026%2028%22%3E%3Cg%20fill%3D%22%230D0E09%22%20fill-opacity%3D%22.32%22%3E%3Cpath%20d%3D%22M2%202H13L10%2012H-1Z%22/%3E%3Cpath%20d%3D%22M15%202H26L23%2012H12Z%22%20fill-opacity%3D%220%22/%3E%3Cpath%20d%3D%22M8%2016H19L22%2026H11Z%22/%3E%3C/g%3E%3C/svg%3E")}
 .tread-host{position:relative;overflow:hidden;isolation:isolate}
@@ -8026,6 +8032,8 @@ window.TechText = (container, props = {}) => {
   };
   let current = null;
   let navigating = false;
+  let carry = null; // colour of the next-project block that was clicked
+  const HOLD = 750;
   const curtain = $('[data-curtain]');
   const curtainLabel = $('[data-curtain-label]');
 
@@ -8053,8 +8061,10 @@ window.TechText = (container, props = {}) => {
       const dest = 'intelligent-cruise-control.html';
       if (initial || reduced()) { location.replace(dest); return; }
       const cs = curtainStyle['cruise-control'];
-      curtain.style.setProperty('--curtain', cs.bg);
-      curtain.style.setProperty('--curtain-ink', cs.ink);
+      const c1 = carry; carry = null;
+      curtain.style.setProperty('--curtain', c1 ? c1.bg : cs.bg);
+      curtain.style.setProperty('--curtain-ink', c1 ? c1.ink : cs.ink);
+      try { if (c1) sessionStorage.setItem('sf-arrive', JSON.stringify({ bg: c1.bg, ink: c1.ink, label: cs.label })); } catch (e) {}
       curtainLabel.textContent = cs.label;
       curtain.classList.remove('is-out');
       void curtain.offsetWidth;
@@ -8080,21 +8090,39 @@ window.TechText = (container, props = {}) => {
       $('#main').focus({ preventScroll: true });
     };
     if (initial || reduced()) {
+      let arrive = null;
+      try { arrive = JSON.parse(sessionStorage.getItem('sf-arrive') || 'null'); sessionStorage.removeItem('sf-arrive'); } catch (e) {}
+      if (initial && arrive && !reduced()) {
+        const cs = curtainStyle[r.page] || curtainStyle.home;
+        curtain.style.transition = 'none';
+        curtain.style.setProperty('--curtain', arrive.bg);
+        curtain.style.setProperty('--curtain-ink', arrive.ink);
+        curtainLabel.textContent = cs.label;
+        curtain.classList.add('is-in');
+        void curtain.offsetWidth;
+        curtain.style.transition = '';
+        setTimeout(async () => {
+          curtain.classList.add('is-out'); curtain.classList.remove('is-in');
+          await wait(680);
+          curtain.style.transition = 'none'; curtain.classList.remove('is-out'); void curtain.offsetWidth; curtain.style.transition = '';
+        }, HOLD + 150);
+      }
       finish();
       if (initial) boot(r);
       return;
     }
     navigating = true;
     const cs = curtainStyle[r.page] || curtainStyle.home;
-    curtain.style.setProperty('--curtain', cs.bg);
-    curtain.style.setProperty('--curtain-ink', cs.ink);
+    const c1 = carry; carry = null;
+    curtain.style.setProperty('--curtain', c1 ? c1.bg : cs.bg);
+    curtain.style.setProperty('--curtain-ink', c1 ? c1.ink : cs.ink);
     curtainLabel.textContent = cs.label;
     curtain.classList.remove('is-out');
     void curtain.offsetWidth;
     curtain.classList.add('is-in');
     await wait(620);
     finish();
-    await wait(80);
+    await wait(c1 ? HOLD : 80);
     curtain.classList.add('is-out');
     curtain.classList.remove('is-in');
     await wait(680);
@@ -8106,6 +8134,11 @@ window.TechText = (container, props = {}) => {
     if (parse().page !== current) route();
   };
   window.addEventListener('hashchange', () => route());
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('.cs-nextproj');
+    if (!a) return;
+    carry = { bg: getComputedStyle(a, '::after').backgroundColor, ink: getComputedStyle(a).color };
+  }, true);
 
   // skip link: move focus without touching the route
   $$('.skip').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const m = $('#main'); m.focus({ preventScroll: true }); scrollToEl(m, true, 0); }));
