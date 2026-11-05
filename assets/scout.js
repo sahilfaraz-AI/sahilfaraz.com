@@ -315,7 +315,9 @@
       '<rect class="sb-eye sb-eye-l" x="21.5" y="27.5" width="6.5" height="11" rx="3.25" fill="url(#sc-eye)"/>' +
       '<rect class="sb-eye sb-eye-r" x="36" y="27.5" width="6.5" height="11" rx="3.25" fill="url(#sc-eye)"/></g>' +
       '<g class="sb-happy" fill="none" stroke="url(#sc-eye)" stroke-width="2.6" stroke-linecap="round" filter="url(#sc-glow)">' +
-      '<path d="M21.5 35c1-3 5.5-3 6.5 0"/><path d="M36 35c1-3 5.5-3 6.5 0"/></g></g>' +
+      '<path d="M21.5 35c1-3 5.5-3 6.5 0"/><path d="M36 35c1-3 5.5-3 6.5 0"/></g>' +
+      '<g class="sb-blush" fill="#FF8F7E"><ellipse cx="17.6" cy="39.4" rx="2.7" ry="1.6"/><ellipse cx="46.4" cy="39.4" rx="2.7" ry="1.6"/></g>' +
+      '<path class="sb-mouth" d="M28.5 40.4Q32 43.4 35.5 40.4" fill="none" stroke="url(#sc-eye)" stroke-width="1.8" stroke-linecap="round" filter="url(#sc-glow)"/></g>' +
       '<rect x="27" y="48" width="10" height="2" rx="1" fill="#EBFC72" fill-opacity=".35"/>' +
       '</g></g></svg>';
   };
@@ -395,26 +397,68 @@
   var cheer = function () {
     setHappy(true); ping();
     if (G && !reduced) G.fromTo(headBot.querySelector('.sb-head'), { rotation: -6, transformOrigin: '50% 90%' }, { rotation: 0, duration: .8, ease: 'elastic.out(1, .45)' });
-    setTimeout(function () { setHappy(false); }, 1400);
+    setTimeout(function () { bots.forEach(function (b) { if (!looks || !looks.some(function (l) { return l.b === b && l.mood === 3; })) b.classList.remove('is-happy'); }); }, 1400);
   };
   if (G && !reduced) {
     bots.forEach(function (b, i) {
       G.to(b.querySelector('.sb-float'), { y: -2.5, duration: 1.6 + i * .3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
     });
+    /* eyes follow the cursor; the closer it gets, the more excited Scout is
+       0 calm (far) · 1 curious · 2 excited · 3 thrilled (cursor right on him) */
     var looks = bots.map(function (b) {
-      var look = b.querySelector('.sb-look'), head = b.querySelector('.sb-head');
+      var look = b.querySelector('.sb-look'), head = b.querySelector('.sb-head'), eyes = b.querySelector('.sb-eyes');
+      var blush = b.querySelector('.sb-blush'), mouth = b.querySelector('.sb-mouth'), tip = b.querySelector('.sb-tip');
       G.set(head, { transformOrigin: '50% 80%' });
-      return { b: b, x: G.quickTo(look, 'x', { duration: .5, ease: 'power3.out' }), y: G.quickTo(look, 'y', { duration: .5, ease: 'power3.out' }), r: G.quickTo(head, 'rotation', { duration: .7, ease: 'power3.out' }) };
+      G.set([eyes, mouth], { transformOrigin: '50% 50%' });
+      G.set(blush, { opacity: 0 }); G.set(mouth, { opacity: 0, scaleX: .6 });
+      return {
+        b: b, eyes: eyes, blush: blush, mouth: mouth, tip: tip, head: head, mood: -1, hop: null, lastPing: 0,
+        x: G.quickTo(look, 'x', { duration: .35, ease: 'power3.out' }),
+        y: G.quickTo(look, 'y', { duration: .35, ease: 'power3.out' }),
+        r: G.quickTo(head, 'rotation', { duration: .6, ease: 'power3.out' })
+      };
     });
-    window.addEventListener('pointermove', function (e) {
+    var MOODS = [
+      { eyes: 1, eyesY: 1, mouth: 0, mScale: .6, blush: 0, tip: 1 },
+      { eyes: 1.06, eyesY: 1.1, mouth: 0, mScale: .6, blush: 0, tip: 1.25 },
+      { eyes: 1.12, eyesY: 1.22, mouth: 1, mScale: 1, blush: .55, tip: 1.5 },
+      { eyes: 1.12, eyesY: 1.22, mouth: 1, mScale: 1.35, blush: .95, tip: 1.7 }
+    ];
+    var setMood = function (l, m) {
+      if (l.mood === m) return;
+      var up = m > l.mood; l.mood = m;
+      var c = MOODS[m];
+      G.to(l.eyes, { scaleX: c.eyes, scaleY: c.eyesY, duration: .35, ease: up ? 'back.out(3)' : 'power2.out', overwrite: 'auto' });
+      G.to(l.mouth, { opacity: c.mouth, scaleX: c.mScale, scaleY: c.mScale, duration: .3, ease: 'back.out(2.5)' });
+      G.to(l.blush, { opacity: c.blush, duration: .4, ease: 'power2.out' });
+      G.to(l.tip, { scale: c.tip, transformOrigin: '50% 50%', duration: .3, ease: 'back.out(3)' });
+      l.b.classList.toggle('is-happy', m === 3);
+      if (l.hop) { l.hop.kill(); l.hop = null; G.to(l.head, { y: 0, duration: .25, ease: 'power2.out' }); }
+      if (m === 3) l.hop = G.timeline({ repeat: -1, repeatDelay: .25 }).to(l.head, { y: -3.5, duration: .16, ease: 'power2.out' }).to(l.head, { y: 0, duration: .32, ease: 'bounce.out' });
+      if (m >= 2 && up) { var now = Date.now(); if (now - l.lastPing > 900) { l.lastPing = now; G.fromTo(l.b.querySelectorAll('.sb-ping'), { scale: .6, opacity: .9 }, { scale: 2.2, opacity: 0, duration: .9, ease: 'power2.out' }); } }
+    };
+    var react = function (e) {
       looks.forEach(function (l) {
         var r = l.b.getBoundingClientRect();
         if (!r.width) return;
-        var dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-        var d = Math.max(1, Math.hypot(dx, dy)), k = Math.min(1, d / 320);
-        l.x(dx / d * 3.2 * k); l.y(dy / d * 2.4 * k); l.r(Math.max(-6, Math.min(6, dx / 60)));
+        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        var dx = e.clientX - cx, dy = e.clientY - cy;
+        var d = Math.max(1, Math.hypot(dx, dy)), k = Math.min(1, d / 240);
+        l.x(dx / d * 5 * k); l.y(dy / d * 3.6 * k); l.r(Math.max(-9, Math.min(9, dx / 45)));
+        var reach = r.width / 2;
+        setMood(l, d <= reach + 50 ? 3 : d <= reach + 200 ? 2 : d <= reach + 460 ? 1 : 0);
       });
-    }, { passive: true });
+    };
+    window.addEventListener('pointermove', function (e) { if (e.pointerType !== 'touch') react(e); }, { passive: true });
+    document.addEventListener('pointerleave', function () { looks.forEach(function (l) { setMood(l, 0); l.x(0); l.y(0); l.r(0); }); });
+    // while he's excited, the antenna keeps pinging
+    setInterval(function () {
+      looks.forEach(function (l) {
+        if (l.mood < 2 || !l.b.getBoundingClientRect().width) return;
+        l.lastPing = Date.now();
+        G.fromTo(l.b.querySelectorAll('.sb-ping'), { scale: .6, opacity: .9 }, { scale: 2.2, opacity: 0, duration: .9, ease: 'power2.out' });
+      });
+    }, 1400);
     setTimeout(blink, 1800);
   }
 

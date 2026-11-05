@@ -151,3 +151,6 @@ body:not([data-route-kind="home"]) .scout { display: none; }
   .scout * { transition: none !important; }
 }
 @media print { .scout { display: none; } }
+
+.scout-bot .sb-blush, .scout-bot .sb-mouth { pointer-events: none; }
+.scout-bot.is-happy .sb-mouth { opacity: 1; }
