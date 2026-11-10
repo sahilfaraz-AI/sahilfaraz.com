@@ -621,6 +621,7 @@
   /* ---------- entrance ---------- */
   var enter = function () {
     if (G && !reduced) G.from(launch, { y: 40, scale: .5, opacity: 0, rotation: -12, duration: 1.1, ease: 'expo.out', clearProps: 'transform,opacity' });
+    var MXs = !!(window.__MX && window.__MX.scout);
     var seen = false;
     try { seen = sessionStorage.getItem('sf-scout-seen') === '1'; } catch (e) {}
     if (seen) return;
@@ -630,8 +631,13 @@
       if (G && !reduced) G.fromTo(tease, { opacity: 0, y: 12, scale: .92, transformOrigin: '100% 100%' }, { opacity: 1, y: 0, scale: 1, duration: .7, ease: 'expo.out' });
       else tease.style.opacity = 1;
       ping();
-      setTimeout(hideTease, 12000);
-    }, 3800);
+      if (MXs) {
+        // V13: the greeting steps aside as soon as the visitor scrolls on
+        var y0 = window.scrollY, onS = function () { if (Math.abs(window.scrollY - y0) > 140) { hideTease(); window.removeEventListener('scroll', onS); } };
+        window.addEventListener('scroll', onS, { passive: true });
+      }
+      setTimeout(hideTease, MXs ? 7000 : 12000);
+    }, MXs ? 6200 : 3800);
   };
   if (document.readyState === 'complete') setTimeout(enter, 900);
   else window.addEventListener('load', function () { setTimeout(enter, 900); });

@@ -676,6 +676,102 @@ body.locked .top{visibility:hidden}
 #req .glass-text{margin-bottom:12px}
 .glass-grid .glass-field input{height:46px}
 @media (max-height:820px){.glass{margin:72px 0 24px}}
+
+/* ==========================================================================
+   V14: Work menu in the top bar, next-project ripple
+   ========================================================================== */
+.site-nav { position: relative; }
+.navdrop {
+  --nd-bg: rgba(19, 20, 14, .97); --nd-ink: #F4F3E8; --nd-ink-2: #C9C8BB; --nd-ink-3: #A3A296; --nd-line: rgba(244, 243, 232, .12);
+  position: absolute; top: calc(100% + 10px); left: 0; z-index: 60;
+  width: min(468px, calc(100vw - 32px)); padding: 6px;
+  background: var(--nd-bg); color: var(--nd-ink);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid var(--nd-line); border-radius: 4px;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .5);
+  visibility: hidden; opacity: 0; transform: translate3d(0, -8px, 0);
+  clip-path: inset(0 0 100% 0 round 4px);
+  transition: opacity .18s ease, transform .5s cubic-bezier(.16, 1, .3, 1), clip-path .5s cubic-bezier(.16, 1, .3, 1), visibility 0s linear .5s;
+  text-align: left; display: none;
+}
+.navdrop.is-on { display: block; }
+.navdrop::before { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }
+.navdrop.is-open {
+  visibility: visible; opacity: 1; transform: none; clip-path: inset(0 0 0 0 round 4px);
+  transition: opacity .18s ease, transform .5s cubic-bezier(.16, 1, .3, 1), clip-path .5s cubic-bezier(.16, 1, .3, 1), visibility 0s;
+}
+.navdrop__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 12px 10px; border-bottom: 1px solid var(--nd-line); margin-bottom: 4px; font: 400 11px/1.2 var(--f-mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; color: var(--nd-ink-3); }
+.navdrop__head b { font-weight: 400; color: var(--nd-ink-2); }
+.navdrop ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.navdrop li { opacity: 0; transform: translate3d(0, 6px, 0); transition: opacity .3s ease, transform .5s cubic-bezier(.16, 1, .3, 1); }
+.navdrop.is-open li { opacity: 1; transform: none; transition-delay: calc(60ms + var(--i, 0) * 38ms); }
+.site-header .site-nav .navdrop a.navdrop__row, header .site-nav .navdrop a.navdrop__row {
+  position: relative; display: grid; grid-template-columns: 12px minmax(0, 1fr) 20px; gap: 3px 14px; align-items: center;
+  margin: 0; padding: 12px 12px 12px 14px; border: 0; border-radius: 2px;
+  font-family: var(--f-sans, system-ui, sans-serif); font-size: 14px; letter-spacing: normal; text-transform: none;
+  color: var(--nd-ink); background: transparent; text-decoration: none;
+  transition: background-color .25s ease;
+}
+.site-header .site-nav .navdrop a.navdrop__row:hover, .site-header .site-nav .navdrop a.navdrop__row:focus-visible,
+header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navdrop__row:focus-visible { background: rgba(244, 243, 232, .06); color: var(--nd-ink); }
+.site-header .site-nav .navdrop a.navdrop__row:focus-visible, header .site-nav .navdrop a.navdrop__row:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; }
+.navdrop__dot { grid-row: 1 / span 3; align-self: start; margin-top: 4px; width: 9px; height: 9px; transform: rotate(45deg); box-shadow: inset 0 0 0 1.5px var(--c); transition: background-color .25s ease, transform .5s cubic-bezier(.16, 1, .3, 1); }
+.navdrop__row:hover .navdrop__dot, .navdrop__row:focus-visible .navdrop__dot { background: var(--c); transform: rotate(135deg); }
+.navdrop__k { grid-column: 2; font: 400 10.5px/1.3 var(--f-mono, ui-monospace, monospace); letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+.navdrop__t { grid-column: 2; font-family: var(--f-display, var(--f-sans, sans-serif)); font-weight: 700; font-size: 19px; line-height: 1.15; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; transition: transform .45s cubic-bezier(.16, 1, .3, 1); }
+.navdrop__t svg { width: 14px; height: 14px; color: var(--nd-ink-3); flex: none; }
+.navdrop__d { grid-column: 2; font-size: 13px; line-height: 1.4; color: var(--nd-ink-2); }
+.navdrop__go { grid-column: 3; grid-row: 1 / span 3; width: 20px; height: 20px; color: var(--nd-ink-3); opacity: 0; transform: translate3d(-6px, 0, 0); transition: opacity .25s ease, transform .45s cubic-bezier(.16, 1, .3, 1), color .25s ease; }
+.navdrop__row:hover .navdrop__t, .navdrop__row:focus-visible .navdrop__t { transform: translate3d(3px, 0, 0); }
+.navdrop__row:hover .navdrop__go, .navdrop__row:focus-visible .navdrop__go { opacity: 1; transform: none; color: var(--c); }
+/* viewfinder brackets close on the row you point at */
+.navdrop__vf { position: absolute; inset: 0; pointer-events: none; --g: -5px; opacity: 0; transition: opacity .2s ease, --g .4s cubic-bezier(.16, 1, .3, 1); }
+.navdrop__vf i { position: absolute; width: 10px; height: 10px; border: 0 solid var(--c); transition: inset .4s cubic-bezier(.16, 1, .3, 1); }
+.navdrop__vf i:nth-child(1) { left: -4px; top: -4px; border-width: 1.5px 0 0 1.5px; }
+.navdrop__vf i:nth-child(2) { right: -4px; top: -4px; border-width: 1.5px 1.5px 0 0; }
+.navdrop__vf i:nth-child(3) { left: -4px; bottom: -4px; border-width: 0 0 1.5px 1.5px; }
+.navdrop__vf i:nth-child(4) { right: -4px; bottom: -4px; border-width: 0 1.5px 1.5px 0; }
+.navdrop__row:hover .navdrop__vf, .navdrop__row:focus-visible .navdrop__vf { opacity: 1; }
+.navdrop__row:hover .navdrop__vf i:nth-child(1), .navdrop__row:focus-visible .navdrop__vf i:nth-child(1) { left: 0; top: 0; }
+.navdrop__row:hover .navdrop__vf i:nth-child(2), .navdrop__row:focus-visible .navdrop__vf i:nth-child(2) { right: 0; top: 0; }
+.navdrop__row:hover .navdrop__vf i:nth-child(3), .navdrop__row:focus-visible .navdrop__vf i:nth-child(3) { left: 0; bottom: 0; }
+.navdrop__row:hover .navdrop__vf i:nth-child(4), .navdrop__row:focus-visible .navdrop__vf i:nth-child(4) { right: 0; bottom: 0; }
+.navdrop__row[aria-current="page"] { background: rgba(244, 243, 232, .04); }
+.site-header .site-nav .navdrop a.navdrop__all, header .site-nav .navdrop a.navdrop__all {
+  display: flex; justify-content: space-between; align-items: center; margin: 4px 0 0; padding: 12px 14px; border: 0; border-top: 1px solid var(--nd-line); border-radius: 0;
+  font: 400 11.5px/1 var(--f-mono, ui-monospace, monospace); letter-spacing: .12em; text-transform: uppercase; color: var(--nd-ink-2); background: transparent;
+}
+.site-header .site-nav .navdrop a.navdrop__all:hover, header .site-nav .navdrop a.navdrop__all:hover, .site-header .site-nav .navdrop a.navdrop__all:focus-visible, header .site-nav .navdrop a.navdrop__all:focus-visible { color: #EBFC72; background: transparent; }
+.navdrop__all svg { width: 16px; height: 16px; transition: transform .4s cubic-bezier(.16, 1, .3, 1); }
+.navdrop__all:hover svg { transform: translate3d(3px, 0, 0); }
+@media (max-width: 900px), (hover: none) { .navdrop { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .navdrop, .navdrop.is-open, .navdrop li, .navdrop.is-open li { transition: opacity .15s ease, visibility 0s; transform: none; clip-path: none; }
+}
+
+/* Next project: the colour floods from where you enter, ripples run ahead of it */
+.tread-host { --rx: 8%; --ry: 50%; position: relative; overflow: hidden; isolation: isolate; }
+.tread-host::after { z-index: -2; clip-path: circle(0px at var(--rx) var(--ry)); transition: clip-path 1s cubic-bezier(.55, .05, .22, 1); }
+.tread-host:hover::after, .tread-host:focus-visible::after { clip-path: circle(0px at var(--rx) var(--ry)); }
+.tread-host.is-lit::after { clip-path: circle(150% at var(--rx) var(--ry)); }
+.tread-host.rip-snap::after { transition: none; }
+.tread-host .tread-tire, .tread-host .tread-trail { display: none !important; }
+/* text follows the flood, not the pointer */
+.tread-host.tread-host.cs-nextproj, .tread-host.tread-host.nextproj { transition: color .5s ease .08s; }
+.tread-host.tread-host.cs-nextproj:hover, .tread-host.tread-host.nextproj:hover { color: var(--ink, #F4F3E8); }
+.tread-host.tread-host.cs-nextproj.is-lit, .tread-host.tread-host.nextproj.is-lit { color: #13140E; }
+[data-theme="mst"].tread-host.tread-host.cs-nextproj.is-lit { color: #fff; }
+.tread-host .rip { position: absolute; left: var(--rx); top: var(--ry); width: 0; height: 0; z-index: -1; pointer-events: none; }
+.tread-host .rip i { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; border: 1.5px solid currentColor; transform: translate(-50%, -50%); opacity: 0; }
+.tread-host.is-rip .rip i { animation: ripRing 1.3s cubic-bezier(.12, .6, .3, 1) both; }
+.tread-host.is-rip .rip i:nth-child(2) { animation-delay: .15s; }
+.tread-host.is-rip .rip i:nth-child(3) { animation-delay: .3s; }
+@keyframes ripRing { 0% { width: 0; height: 0; opacity: .8; } 60% { opacity: .35; } 100% { width: var(--rw, 1600px); height: var(--rw, 1600px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .tread-host::after { transition: none; }
+  .tread-host .rip { display: none; }
+}
+.navdrop .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 </style>
 <script src="assets/analytics.js" defer></script>
 </head>
@@ -756,7 +852,7 @@ setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove();
 <header class="top">
   <div class="wrap top-in">
     <a class="wordmark" href="index.html#/" aria-label="Sahil Faraz, home"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="mark__br" d="M3 11V3h8M21 3h8v8M29 21v8h-8M11 29H3v-8"/><circle class="mark__dot" cx="16" cy="16" r="3.4"/></svg></span><span class="name">Sahil Faraz</span></a>
-    <nav class="site-nav" aria-label="Main"><a href="index.html#/work" aria-current="true" class="keep">Work</a><a href="index.html#/play">Play</a><a href="index.html#/about">About</a><a href="index.html#/resume">Resume</a><a href="index.html#/contact" class="nav-cta">Contact</a></nav>
+    <nav class="site-nav" aria-label="Main"><a href="index.html#/work" aria-current="true" class="keep">Work</a><a href="index.html#/play">Play</a><a href="index.html#/about">About</a><a href="index.html#/contact" class="nav-cta">Contact</a></nav>
   </div>
   <div class="progress" aria-hidden="true"></div>
 </header>
@@ -1272,5 +1368,134 @@ window.initCase=function(){
 })();
 </script>
 
+<script>
+/* ==========================================================================
+   V14: Work menu in the top bar, next-project ripple
+   ========================================================================== */
+(() => {
+  'use strict';
+  const ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12H18.0587M12.1229 5L18.8261 11.5875C19.058 11.8153 19.058 12.1847 18.8261 12.4125L12.1229 19"/></svg>';
+  const LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7.5 10V6.5C7.5 4.01472 9.51472 2 12 2C14.4853 2 16.5 4.01472 16.5 6.5V10M4 13V19C4 20.6569 5.34315 22 7 22H17C18.6569 22 20 20.6569 20 19V13C20 11.3431 18.6569 10 17 10H7C5.34315 10 4 11.3431 4 13Z"/><path fill="currentColor" d="M13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16Z" stroke="none"/></g></svg>';
+  const WORK = [
+    { id: 'cruise-control', c: '#7EDB5A', k: 'Stellantis, in production', t: 'Intelligent Cruise Control', d: 'Cruise control that adopts the legal speed limit.', lock: true },
+    { id: 'codesigner', c: '#3FD2B0', k: 'Stellantis, 2026', t: 'CoDesigner', d: 'An AI tool that lets HMI teams decide on evidence.' },
+    { id: 'mysleepytale', c: '#F6C453', k: 'Co-founder, live product', t: 'MySleepyTale', d: 'An AI bedtime-story app that stars your child.' },
+    { id: 'research-alerts', c: '#F27AA8', k: 'University of Toronto, 2022', t: 'Research Alerts', d: 'A funding alert service, redesigned around the inbox.' },
+    { id: 'aug-fice', c: '#A6DA6E', k: 'University of Toronto, 2021', t: 'Aug-Fice', d: 'A focus app for mixed reality glasses.' }
+  ];
+
+  /* ---------- Work menu ---------- */
+  const nav = document.querySelector('.site-nav');
+  const link = nav && Array.from(nav.querySelectorAll('a')).find((a) => /#\/work$/.test(a.getAttribute('href') || ''));
+  if (link) {
+    const base = link.getAttribute('href').replace(/#\/work$/, '');
+    const here = /intelligent-cruise-control/.test(location.pathname) ? 'cruise-control' : null;
+    const panel = document.createElement('div');
+    panel.className = 'navdrop';
+    panel.id = 'navdrop';
+    panel.innerHTML =
+      '<p class="navdrop__head"><span>Selected work</span><b>' + WORK.length + ' case studies</b></p><ul>' +
+      WORK.map((w, i) =>
+        '<li style="--i:' + i + '"><a class="navdrop__row" href="' + base + '#/' + w.id + '" style="--c:' + w.c + '"' + (here === w.id ? ' aria-current="page"' : '') + '>' +
+        '<span class="navdrop__vf" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
+        '<span class="navdrop__dot" aria-hidden="true"></span>' +
+        '<span class="navdrop__k">' + w.k + '</span>' +
+        '<span class="navdrop__t">' + w.t + (w.lock ? LOCK + '<span class="sr-only">(password protected)</span>' : '') + '</span>' +
+        '<span class="navdrop__d">' + w.d + '</span>' +
+        '<span class="navdrop__go" aria-hidden="true">' + ARROW + '</span></a></li>'
+      ).join('') +
+      '</ul><a class="navdrop__all" href="' + base + '#/work">All work on one page' + ARROW + '</a>';
+    link.insertAdjacentElement('afterend', panel);
+    link.setAttribute('aria-controls', 'navdrop');
+    link.setAttribute('aria-expanded', 'false');
+
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+    let t = 0;
+    const isOpen = () => panel.classList.contains('is-open');
+    const place = () => {
+      const nb = nav.getBoundingClientRect(), lb = link.getBoundingClientRect();
+      const w = panel.offsetWidth || 468;
+      let left = lb.left - nb.left - 6;
+      const maxLeft = window.innerWidth - 16 - nb.left - w;
+      panel.style.left = Math.round(Math.min(left, maxLeft)) + 'px';
+    };
+    // hidden with display:none while closed, so it never widens the page
+    let off = 0;
+    const open = () => {
+      clearTimeout(t); clearTimeout(off);
+      if (isOpen()) return;
+      panel.classList.add('is-on'); place(); void panel.offsetWidth;
+      panel.classList.add('is-open'); link.setAttribute('aria-expanded', 'true');
+    };
+    const close = (now) => {
+      clearTimeout(t);
+      const go = () => {
+        panel.classList.remove('is-open'); link.setAttribute('aria-expanded', 'false');
+        clearTimeout(off); off = setTimeout(() => { if (!isOpen()) panel.classList.remove('is-on'); }, 520);
+      };
+      if (now) { go(); clearTimeout(off); panel.classList.remove('is-on'); } else t = setTimeout(go, 220);
+    };
+    link.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'touch' && fine.matches) open(); });
+    link.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch') close(); });
+    panel.addEventListener('pointerenter', () => clearTimeout(t));
+    panel.addEventListener('pointerleave', () => close());
+    link.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || (e.key === ' ' && !isOpen())) { e.preventDefault(); open(); const f = panel.querySelector('a'); if (f) f.focus(); }
+    });
+    panel.addEventListener('keydown', (e) => {
+      const rows = Array.from(panel.querySelectorAll('a'));
+      const i = rows.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); rows[Math.min(rows.length - 1, i + 1)].focus(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); if (i <= 0) { quiet = true; link.focus(); } else rows[i - 1].focus(); }
+    });
+    let quiet = false;
+    link.addEventListener('focus', () => { if (quiet) { quiet = false; return; } try { if (link.matches(':focus-visible')) open(); } catch (e) { open(); } });
+    nav.addEventListener('focusout', (e) => { if (!panel.contains(e.relatedTarget) && e.relatedTarget !== link) close(true); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) { close(true); if (document.activeElement !== link) { quiet = true; link.focus(); } } });
+    panel.addEventListener('click', () => close(true));
+    window.addEventListener('resize', () => { if (isOpen()) place(); });
+    window.addEventListener('hashchange', () => close(true));
+  }
+
+  /* ---------- next project: colour floods from the pointer, ripples run ahead ---------- */
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const host = (e) => e.target && e.target.closest && e.target.closest('.tread-host');
+  const aim = (el, e) => {
+    const b = el.getBoundingClientRect();
+    const x = e && e.clientX != null ? e.clientX - b.left : b.width * 0.08;
+    const y = e && e.clientY != null ? e.clientY - b.top : b.height * 0.5;
+    el.style.setProperty('--rx', Math.round(x) + 'px');
+    el.style.setProperty('--ry', Math.round(y) + 'px');
+    el.style.setProperty('--rw', Math.round(Math.hypot(b.width, b.height) * 2.1) + 'px');
+  };
+  const ripple = (el) => {
+    if (reduce.matches) return;
+    if (!el.querySelector(':scope > .rip')) {
+      const r = document.createElement('span');
+      r.className = 'rip'; r.setAttribute('aria-hidden', 'true'); r.innerHTML = '<i></i><i></i><i></i>';
+      el.appendChild(r);
+    }
+    el.classList.remove('is-rip'); void el.offsetWidth; el.classList.add('is-rip');
+  };
+  // the flood starts where you enter: jump the centre there first, then let only the radius animate
+  const light = (el, e) => {
+    el.classList.add('rip-snap'); aim(el, e);
+    void getComputedStyle(el, '::after').clipPath;
+    el.classList.remove('rip-snap');
+    void getComputedStyle(el, '::after').clipPath;
+    el.classList.add('is-lit'); ripple(el);
+  };
+  const dim = (el, e) => { aim(el, e); el.classList.remove('is-lit'); };
+  document.addEventListener('pointerover', (e) => { const el = host(e); if (!el || el.contains(e.relatedTarget)) return; light(el, e); });
+  document.addEventListener('pointerout', (e) => { const el = host(e); if (!el || el.contains(e.relatedTarget)) return; if (document.activeElement !== el) dim(el, e); });
+  document.addEventListener('focusin', (e) => {
+    const el = host(e);
+    if (!el) return;
+    let kb = true; try { kb = el.matches(':focus-visible'); } catch (err) {}
+    if (kb) light(el, null);
+  });
+  document.addEventListener('focusout', (e) => { const el = host(e); if (el && !el.matches(':hover')) dim(el, null); });
+})();
+</script>
 </body>
 </html>
