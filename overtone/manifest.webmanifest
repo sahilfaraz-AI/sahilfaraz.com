@@ -1,12 +1,12 @@
 {
- "name": "Walltrip",
- "short_name": "Walltrip",
- "description": "Music turns your walls into living light.",
+ "name": "Overtone",
+ "short_name": "Overtone",
+ "description": "Music you can see, on the walls of your own room.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
- "background_color": "#0b0914",
- "theme_color": "#0b0914",
+ "background_color": "#07060c",
+ "theme_color": "#07060c",
  "icons": [
   {
    "src": "icon-192.png",

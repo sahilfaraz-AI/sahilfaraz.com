@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Overtone</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#07060c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  /* One column on a near-black ground: name and the one main action, the room preview, then the same glass panel the headset shows. Dark by design: the page frames light. */
+  :root {
+    color-scheme: dark;
+    --ground: #07060c;
+    --text: #f5f3fa;
+    --muted: #a39db3;
+    --faint: #6f6980;
+    --line: rgba(255, 255, 255, 0.14);
+    --glass: rgba(255, 255, 255, 0.07);
+    --font: "Inter", "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  }
+  html, body { background: var(--ground); color: var(--text); }
+  body { font-family: var(--font); font-size: 17px; line-height: 1.45; }
+  body::after {
+    /* a slow wash of color behind everything, so the glass has something to sit on */
+    content: ""; position: fixed; inset: -20%; z-index: -1; pointer-events: none;
+    background: radial-gradient(40% 35% at 25% 30%, rgba(90, 70, 255, 0.20), transparent 70%), radial-gradient(35% 40% at 78% 62%, rgba(255, 70, 150, 0.14), transparent 70%), radial-gradient(30% 30% at 55% 90%, rgba(60, 200, 255, 0.12), transparent 70%);
+    animation: drift 40s ease-in-out infinite alternate;
+  }
+  @keyframes drift { to { transform: translate3d(4%, -3%, 0) rotate(8deg); } }
+  @media (prefers-reduced-motion: reduce) { body::after { animation: none; } }
+  .app {
+    max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px;
+    padding-block: 28px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 28px; }
+  .brand { min-width: 0; }
+  h1 { font-weight: 700; font-size: 34px; line-height: 1.2; letter-spacing: -0.022em; margin: 0; }
+  .lede { margin: 2px 0 0; color: var(--muted); max-width: 46ch; }
+  #status { margin: 6px 0 0; color: var(--faint); font-size: 15px; }
+  .btn {
+    font: 600 17px var(--font); color: var(--text); background: var(--glass); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0 26px; min-height: 52px; cursor: pointer; backdrop-filter: blur(20px);
+    transition: background 0.2s ease-out, transform 0.2s ease-out;
+  }
+  .btn.primary { background: #ffffff; border-color: #ffffff; color: #15131c; }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); background: rgba(255, 255, 255, 0.16); }
+  .btn.primary:hover:not(:disabled) { background: #ffffff; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:focus-visible, .panel:focus-visible, .chip:focus-visible { outline: 3px solid #8fd8ff; outline-offset: 3px; }
+  .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; min-height: 220px; border-radius: 28px; overflow: hidden; background: #030206; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .panel { display: block; width: 100%; height: auto; aspect-ratio: 1680 / 1040; touch-action: none; filter: drop-shadow(0 24px 50px rgba(0, 0, 0, 0.45)); }
+  .quick { display: none; flex-wrap: wrap; gap: 10px; }
+  .chip { font: 500 16px var(--font); color: var(--text); background: var(--glass); border: 1px solid var(--line); border-radius: 999px; min-height: 48px; padding: 0 20px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: #ffffff; color: #15131c; border-color: #ffffff; }
+  .note { margin: 0; color: var(--muted); max-width: 68ch; }
+  .guide { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .guide li { background: var(--glass); border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; min-width: 0; }
+  .guide b { display: block; font-weight: 600; }
+  .guide span { color: var(--muted); font-size: 15px; }
+  h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 10px 0 0; }
+  @media (max-width: 860px) { #panel-host { display: none; } .quick { display: flex; } h1 { font-size: 28px; } }
+</style>
+
+<main class="app">
+  <header>
+    <div class="brand">
+      <h1>Overtone</h1>
+      <p class="lede">Music you can see, on the walls of your own room.</p>
+      <p id="status" role="status">Loading…</p>
+    </div>
+    <button id="enter" class="btn primary" type="button" disabled>Enter mixed reality</button>
+  </header>
+  <p id="xr-note" class="note" hidden>Mixed reality starts in the Meta Quest browser. This screen shows a preview; move the pointer over it to look around.</p>
+  <div id="stage" class="stage"><canvas id="view" aria-label="Preview of the scene on the far wall of a dark room"></canvas></div>
+  <div id="quick" class="quick" role="group" aria-label="Experiences"></div>
+  <div id="looks" class="quick" role="group" aria-label="Looks for this track"></div>
+  <div id="panel-host"></div>
+  <h2>In the headset</h2>
+  <ul class="guide">
+    <li><b>Grip button</b><span>Look at a wall, the floor or the ceiling and squeeze. The scene moves there.</span></li>
+    <li><b>Point and pinch, or trigger</b><span>Use the floating panel. Drag the bar under it to move it.</span></li>
+    <li><b>Look</b><span>Each track has its own scene, plus Skyline and Chase. Pick one on the panel.</span></li>
+    <li><b>A or X</b><span>Play and pause.</span></li>
+    <li><b>B or Y</b><span>Show or hide the panel.</span></li>
+    <li><b>Live</b><span>Choose Live here first and allow the microphone. The prompt cannot appear inside mixed reality.</span></li>
+  </ul>
+</main>
+
+<script>window.OVERTONE_EXPERIENCES=[{"id":"what-you-see","title":"What You See","subtitle":"Rido","looks":["halo","city","drive"],"showAt":150.2,"note":"drum hits mapped ahead of time","file":"assets/songs/what-you-see.mp3","featuresFile":"assets/songs/what-you-see.features.bin","scoreFile":"assets/songs/what-you-see.score.json"},{"id":"fracture","title":"Fracture","subtitle":"Drum and bass","looks":["rig","drive","city"],"showAt":24.9,"key":"F minor","note":"every note is scored","file":"assets/songs/fracture.mp3","featuresFile":"assets/songs/fracture.features.bin","scoreFile":"assets/songs/fracture.score.json"},{"id":"low-tide","title":"Low Tide","subtitle":"Ambient, seven layers","looks":["tide","city","drive"],"showAt":83.2,"key":"D major","note":"every note is scored","file":"assets/songs/low-tide.mp3","featuresFile":"assets/songs/low-tide.features.bin","scoreFile":"assets/songs/low-tide.score.json"},{"id":"live","title":"Live","subtitle":"Any music, by mic","looks":["halo","city","drive"],"kind":"mic"}];</script>
+<script src="app.js?v=202611111643"></script>
+</body>
+</html>
