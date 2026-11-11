@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Walltrip</title>
+<link rel="icon" href="data:,">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+  /* Layout: the wall preview leads, a single column of controls follows. One dark look by choice: the page frames glowing visuals. */
+  :root {
+    color-scheme: dark;
+    --ink: #0b0914;
+    --panel: #151020;
+    --line: #2d2542;
+    --text: #f2edf9;
+    --muted: #a99fbe;
+    --magenta: #e0358f;
+    --cyan: #6fe6ff;
+    --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  html, body { background: var(--ink); color: var(--text); }
+  body { font-family: var(--body); font-size: 15px; line-height: 1.5; }
+  .app {
+    max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px;
+    padding-block: 20px 36px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+  h1 { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -0.01em; margin: 0; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 16px; margin: 0 0 8px; text-wrap: balance; }
+  #status { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 0; }
+  .stage {
+    position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 64vh; min-height: 220px;
+    background: #05040a; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+  }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .controls { display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  button, .filebtn {
+    font: 500 15px var(--display); color: var(--text); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 6px; padding: 10px 16px; cursor: pointer;
+  }
+  button:hover:not(:disabled), .filebtn:hover { border-color: var(--cyan); }
+  button:focus-visible, .filebtn:focus-within, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  button:disabled { color: var(--muted); cursor: default; opacity: 0.6; }
+  button.primary { background: var(--magenta); border-color: var(--magenta); color: #fff; }
+  button.primary:disabled { background: var(--panel); border-color: var(--line); }
+  .chip { padding: 7px 14px; border-radius: 999px; font-size: 14px; }
+  .chip[aria-pressed="true"] { border-color: var(--cyan); color: var(--cyan); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .sync label { font-family: var(--display); font-weight: 500; }
+  .sync input { flex: 1 1 180px; max-width: 360px; accent-color: var(--cyan); }
+  .sync output { font-variant-numeric: tabular-nums; min-width: 5.5em; color: var(--cyan); }
+  .note { margin: 0; color: var(--muted); max-width: 65ch; }
+  .guide { border-top: 1px solid var(--line); padding-top: 16px; }
+  .guide dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; }
+  .guide dt { font-family: var(--display); font-weight: 500; color: var(--cyan); }
+  .guide dd { margin: 0; color: var(--text); min-width: 0; }
+  @media (max-width: 480px) { .guide dl { grid-template-columns: 1fr; gap: 2px; } .guide dd { margin-bottom: 8px; } }
+</style>
+
+<main class="app">
+  <header>
+    <h1>Walltrip</h1>
+    <p id="status" role="status">Loading the demo song…</p>
+  </header>
+
+  <div id="stage" class="stage">
+    <canvas id="view" aria-label="Preview of the visualizer covering the far wall of a room"></canvas>
+  </div>
+
+  <section class="controls" aria-label="Controls">
+    <div class="row">
+      <button id="enter" class="primary" type="button" disabled>Enter mixed reality</button>
+      <button id="play" type="button" disabled>Play with sound</button>
+      <label class="filebtn" for="file">Use your own song<input id="file" class="visually-hidden" type="file" accept="audio/*"></label>
+    </div>
+    <p id="xr-note" class="note" hidden>Mixed reality starts in the Meta Quest browser. On this screen you get a flat preview of the same visuals. Move the pointer over it to see the depth.</p>
+    <div id="styles" class="row" role="group" aria-label="Visualizer"></div>
+    <div class="row sync">
+      <label for="sync">Sync</label>
+      <input id="sync" type="range" min="-300" max="300" step="10" value="0">
+      <output id="sync-value" for="sync">0 ms</output>
+    </div>
+    <p class="note">Raise Sync if the visuals land before the sound. Bluetooth headphones and speakers usually need it.</p>
+  </section>
+
+  <section class="guide">
+    <h2>In the headset</h2>
+    <dl>
+      <dt>Trigger or pinch</dt><dd>Next visualizer</dd>
+      <dt>Grip</dt><dd>Move the visuals to the wall you are facing</dd>
+      <dt>A or X</dt><dd>Pause and resume</dd>
+      <dt>B or Y</dt><dd>Cover all walls. If no walls were found, start a room scan.</dd>
+      <dt>Thumbstick left and right</dt><dd>Sync, 10 ms per nudge</dd>
+    </dl>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
