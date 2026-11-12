@@ -1,0 +1,13 @@
+{
+  "name": "aug-fice",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "three": "0.187.0",
+    "esbuild": "0.28.2",
+    "@iconify-json/keyline-icons": "1.2.15",
+    "@fontsource/source-sans-3": "^5.0.0",
+    "@fontsource/nunito-sans": "^5.0.0"
+  }
+}

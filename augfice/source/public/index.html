@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aug-Fice: a quiet office you can wear</title>
+<meta name="description" content="Aug-Fice is a mixed reality focus app for Meta Quest 3. A virtual partition hides a busy room while you work in focus sets or rest in Zen mode. Concept and design by Sahil Faraz.">
+<meta name="theme-color" content="#191512">
+<meta property="og:title" content="Aug-Fice: a quiet office you can wear">
+<meta property="og:description" content="A mixed reality focus app for Meta Quest 3, with a browser preview. Concept and design by Sahil Faraz.">
+<meta property="og:image" content="https://sahilfaraz.com/assets/augfice--hero-cafe.webp">
+<meta property="og:url" content="https://sahilfaraz.com/augfice/">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://sahilfaraz.com/augfice/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23393D36'/%3E%3Ccircle cx='27' cy='36' r='15' fill='%238BC34A'/%3E%3Ccircle cx='37' cy='28' r='15' fill='none' stroke='%236B9E2F' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/source-sans-3-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: "Source Sans 3"; src: url(fonts/source-sans-3-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Source Sans 3"; src: url(fonts/source-sans-3-600.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Source Sans 3"; src: url(fonts/source-sans-3-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Nunito Sans"; src: url(fonts/nunito-sans-300.woff2) format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Nunito Sans"; src: url(fonts/nunito-sans-800.woff2) format("woff2"); font-weight: 800; font-display: swap; }
+:root { --charcoal: #393D36; --green: #8BC34A; --gold: #D9C37E; --ink: #1C2415; --text: rgba(255,255,255,.80); --dim: rgba(255,255,255,.56); }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; background: #191512; color: var(--text); font: 400 17px/1.5 "Source Sans 3", "Source Sans Pro", system-ui, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ic { width: 24px; height: 24px; flex: none; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
+
+#launch { position: fixed; inset: 0; display: grid; align-items: end; justify-items: center; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); pointer-events: none;
+  background: linear-gradient(180deg, rgba(20,18,15,0) 34%, rgba(20,18,15,.82) 100%); opacity: 0; transition: opacity .5s ease; }
+#launch.ready { opacity: 1; }
+#launch.hidden { opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s .35s; }
+.card { pointer-events: auto; width: min(760px, 100%); max-height: min(78vh, 720px); overflow: auto; padding: 28px 28px 20px; border-radius: 28px;
+  background: linear-gradient(160deg, rgba(47,62,56,.86), rgba(30,33,27,.90)); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.16);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2); backdrop-filter: blur(24px) saturate(1.2); }
+h1 { margin: 0 0 8px; font: 300 clamp(28px, 4.4vw, 40px)/1.12 "Nunito Sans", "Avenir Next", sans-serif; letter-spacing: .01em; color: rgba(255,255,255,.94); }
+h1 b { font-weight: 800; }
+.lede { margin: 0 0 20px; max-width: 60ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+button.cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px; border-radius: 999px; border: 2px solid var(--green); cursor: pointer;
+  font: 600 17px/1 "Source Sans 3", sans-serif; letter-spacing: .02em; background: var(--green); color: var(--ink); transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
+button.cta.secondary { background: rgba(139,195,74,.10); color: var(--green); }
+button.cta:hover { box-shadow: 0 0 0 5px rgba(139,195,74,.20); }
+button.cta:hover .ic { transform: translateX(2px); }
+button.cta:active { transform: scale(.98); }
+button.cta[hidden] { display: none; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.note { margin: 14px 0 6px; color: var(--dim); font-size: 15.5px; }
+details { border-top: 1px solid rgba(255,255,255,.12); }
+details:first-of-type { margin-top: 14px; }
+summary { display: flex; align-items: center; gap: 12px; min-height: 52px; cursor: pointer; font-weight: 600; color: rgba(255,255,255,.90); list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary .ic { color: var(--green); }
+summary .chev { margin-left: auto; color: var(--dim); }
+details[open] summary .chev { transform: rotate(90deg); }
+summary:hover .ic:first-child { transform: rotate(-6deg); }
+.body { padding: 0 0 16px 36px; }
+textarea { width: 100%; min-height: 112px; resize: vertical; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.28); color: rgba(255,255,255,.92); font: 400 17px/1.45 "Source Sans 3", sans-serif; }
+textarea::placeholder { color: rgba(255,255,255,.42); }
+.help { margin: 8px 0 0; color: var(--dim); font-size: 15px; }
+ul.ways { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+ul.ways li { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; }
+ul.ways .ic { color: var(--green); margin-top: 1px; }
+ul.ways b { color: rgba(255,255,255,.92); font-weight: 600; }
+footer { margin-top: 4px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.12); display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--dim); font-size: 15px; }
+a { color: var(--green); text-underline-offset: 3px; }
+#hint { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translate(-50%, 12px); padding: 10px 18px; border-radius: 999px; background: rgba(30,33,27,.82); border: 1px solid rgba(255,255,255,.14);
+  color: var(--text); font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .4s ease, transform .4s ease; white-space: nowrap; }
+#hint.show { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 1080px) { #launch { align-items: center; justify-items: start; padding-left: 5vw; background: linear-gradient(90deg, rgba(20,18,15,.72) 0%, rgba(20,18,15,0) 58%); } .card { width: 470px; } }
+@media (max-width: 520px) { .card { padding: 22px 18px 16px; border-radius: 24px; } .actions button { flex: 1 1 100%; } .body { padding-left: 0; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true" focusable="false"><!--SPRITE--></svg>
+<canvas id="stage" aria-label="Aug-Fice mixed reality preview"></canvas>
+
+<main id="launch">
+  <div class="card">
+    <h1><b>Aug-Fice</b>, a quiet office you can wear</h1>
+    <p class="lede">A mixed reality focus app. It puts a virtual partition between you and a busy room, then runs your focus sets with breaks, or an untimed Zen session.</p>
+    <div class="actions">
+      <button class="cta" id="enter" hidden><svg class="ic" aria-hidden="true"><use href="#i-glasses"/></svg><span>Enter mixed reality</span></button>
+      <button class="cta" id="preview"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><span>Start the preview</span></button>
+    </div>
+    <p class="note" id="xr-note">Checking this device.</p>
+
+    <details>
+      <summary><svg class="ic" aria-hidden="true"><use href="#i-list-check"/></svg>Prepare your to-do list<svg class="ic chev" aria-hidden="true"><use href="#i-chevron-right"/></svg></summary>
+      <div class="body">
+        <label for="tasks" class="help" style="display:block;margin:0 0 8px">One task per line</label>
+        <textarea id="tasks" placeholder="Finish the design review&#10;Reply to Sam" spellcheck="true"></textarea>
+        <p class="help">Tasks stay in this browser. In the app, choose Import from web app on the to-do screen.</p>
+      </div>
+    </details>
+    <details>
+      <summary><svg class="ic" aria-hidden="true"><use href="#i-hand-pointer"/></svg>Three ways to interact<svg class="ic chev" aria-hidden="true"><use href="#i-chevron-right"/></svg></summary>
+      <div class="body">
+        <ul class="ways">
+          <li><svg class="ic" aria-hidden="true"><use href="#i-hand-pointer"/></svg><span><b>Hand ray.</b> Point with your hand and pinch to select. You can also touch buttons with your index finger. Controllers work the same way.</span></li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-scan-face"/></svg><span><b>Head tracking.</b> Point with your head and pinch to tap. Switch to it in Settings.</span></li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-mouse"/></svg><span><b>Mouse and keyboard.</b> Click to select and type task names. Drag the bar under the window to move it, or a corner bracket to resize it.</span></li>
+        </ul>
+      </div>
+    </details>
+    <footer>
+      <span>Concept and design by Sahil Faraz.</span>
+      <a href="https://sahilfaraz.com/#/aug-fice">Read the Aug-Fice case study</a>
+    </footer>
+  </div>
+</main>
+<div id="hint" role="status">Drag to look around. Click to select.</div>
+<script type="module" src="app.js?v=__BUILD__"></script>
+</body>
+</html>
