@@ -37,7 +37,7 @@
     {
       id: 'icc', chip: 'Intelligent Cruise Control',
       keys: ['intelligent cruise control', 'cruise control', 'icc', 'speed limit adjustment', 'adaptive cruise', 'acc', 'speed limit', 'cruise control case study', 'most important project', 'biggest project', 'flagship', 'simulator'],
-      a: '<p><b>Intelligent Cruise Control</b> is cruise control that adopts the legal speed limit, with the driver still in charge. It is in production at Stellantis and has been Sahil’s main focus over the years.</p><p>He was the feature designer and continuous improvement lead, and tested it with drivers in a simulator. It has launched, and the next improvement loop is planned.</p><p>The case study is password protected because the work isn’t public yet. Email Sahil for access.</p>',
+      a: '<p><b>Intelligent Cruise Control</b> is cruise control that adopts the legal speed limit, with the driver still in charge. It is in production at Stellantis and has been Sahil’s main focus over the years.</p><p>The program asked him to design the ideal version, and he owns the spec. Because speed limit data is sometimes wrong, he designed for trust: manual confirmation by default, automatic as a choice, and clear messages for accepting or rejecting a limit. He won over the global UX team with a guerrilla test and backed it with owner sentiment and a 30-driver simulator study.</p><p>The story is public. The released logic, study results and next architecture are in a password-protected full version. Email Sahil for access.</p>',
       acts: [{ label: 'Open the case study', href: '#/cruise-control' }, { label: 'Copy email', copy: EMAIL }],
       next: ['codesigner', 'research', 'stellantis']
     },
