@@ -530,6 +530,10 @@ body:not([data-route-kind="case"]) .read-progress { display: none; }
 .facts dt { color: var(--plate-ink-2); }
 .facts dd { font-weight: 520; }
 .spread__text .btn { margin-top: clamp(24px, 3vw, 40px); }
+.spread__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(24px, 3vw, 40px); }
+.spread__actions .btn { margin-top: 0; }
+.cs-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: clamp(28px, 3.4vw, 44px); }
+.cs-hero__note { color: var(--ink-2); font-size: 15.5px; max-width: 44ch; }
 
 /* mini report (CoDesigner) */
 .mini-report {
@@ -4295,7 +4299,10 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
             <div><dt>Tested</dt><dd>14-person background preference test</dd></div>
             <div><dt>Designed</dt><dd>11 hi-fi screens for MR glasses</dd></div>
           </dl>
-          <a class="btn btn--accent" href="#/aug-fice"><span class="btn__label">Read the case study</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+          <div class="spread__actions">
+            <a class="btn btn--accent" href="#/aug-fice"><span class="btn__label">Read the case study</span><svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+            <a class="btn btn--ghost" href="/augfice/" data-cursor="Open the app"><svg class="ic" aria-hidden="true"><use href="#i-glasses"/></svg><span class="btn__label">Try the live demo</span></a>
+          </div>
         </div>
 
         <figure class="spread__demo focus-demo" data-focus-demo data-autoplay aria-label="A focus session in Aug-Fice: the partition hides the room during a set and clears for the break">
@@ -6291,12 +6298,16 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
       <h1 class="cs-hero__title">Aug-Fice</h1>
       <p class="cs-hero__lede">A quiet office you can wear. An app concept for mixed reality glasses that helps students and desk workers focus in busy, shared places.</p>
       <dl class="cs-meta cs-meta--6">
-        <div><dt>Product</dt><dd>App concept for MR glasses</dd></div>
+        <div><dt>Product</dt><dd>App concept for MR glasses, now a working demo for Meta Quest 3</dd></div>
         <div><dt>Courses</dt><dd>INF2310 and INF2191, University of Toronto, Fall 2021</dd></div>
         <div><dt>Team</dt><dd>Concept with Grace Chen and Sabrina Yeasmin</dd></div>
         <div><dt>My role</dt><dd>Storyboard, UI sketches, user research, visual design, hi-fi UI</dd></div>
         <div><dt>Tools</dt><dd>Figma, Miro, Stark</dd></div>
       </dl>
+      <div class="cs-hero__actions">
+        <a class="btn btn--accent" href="/augfice/" data-cursor="Open the app"><svg class="ic" aria-hidden="true"><use href="#i-glasses"/></svg><span class="btn__label">Try the live demo</span></a>
+        <p class="cs-hero__note">Open it in the Meta Quest 3 browser to use it in your own room, or preview it on any screen.</p>
+      </div>
       <div class="cs-modeintro" data-modeintro></div>
     </div>
     <div class="cs-plate cs-plate--hero">
