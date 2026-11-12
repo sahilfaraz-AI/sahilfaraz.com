@@ -5,6 +5,10 @@ export const SHAPES = ['rectangle', 'cubicle', 'sphere', 'blinds'];
 export const SHAPE_LABEL = { rectangle: 'Rectangle', cubicle: 'Cubicle', sphere: 'Sphere', blinds: 'Blinds' };
 export const BGS = ['tex1', 'tex2', 'tex3', 'beach'];
 export const BG_LABEL = { tex1: 'Texture 1', tex2: 'Texture 2', tex3: 'Texture 3', beach: 'Beach' };
+export const TINTS = ['original', 'sage', 'sand', 'ocean', 'dusk'];
+export const TINT_LABEL = { original: 'Original', sage: 'Sage', sand: 'Sand', ocean: 'Ocean', dusk: 'Dusk' };
+// Swatch colours. Sage and Sand are the style guide green and gold.
+export const TINT_HEX = { original: '#2E5C57', sage: '#8BC34A', sand: '#D9C37E', ocean: '#4A90A4', dusk: '#8C6BB1' };
 export const ENVS = ['home', 'work', 'public'];
 export const ENV_LABEL = { home: 'Home', work: 'Work', public: 'Public' };
 export const APPS = ['Phone', 'Messages', 'Mail', 'Calendar', 'Slack', 'Teams', 'WhatsApp', 'Reminders'];
@@ -18,9 +22,9 @@ function defaults() {
     env: 'public',
     // Presets from the hi-fi design: Home low + sphere, Work high + cubicle, Public medium + blinds.
     presets: {
-      home: { shape: 'sphere', bg: 'tex1', transparency: 0.2, distanceFt: 5, people: false, gray: false },
-      work: { shape: 'cubicle', bg: 'tex1', transparency: 0.75, distanceFt: 5, people: false, gray: false },
-      public: { shape: 'blinds', bg: 'tex1', transparency: 0.45, distanceFt: 5, people: false, gray: false },
+      home: { shape: 'sphere', bg: 'tex1', tint: 'original', transparency: 0.2, distanceFt: 5, people: false, gray: false },
+      work: { shape: 'cubicle', bg: 'tex1', tint: 'original', transparency: 0.75, distanceFt: 5, people: false, gray: false },
+      public: { shape: 'blinds', bg: 'tex1', tint: 'original', transparency: 0.45, distanceFt: 5, people: false, gray: false },
     },
     focus: { duration: 25, sets: 4, shortBreak: 5, longBreak: 30, changeBg: false },
     zen: { length: 0, scene: 'beach' },
@@ -28,7 +32,7 @@ function defaults() {
     prepared: [],
     seen: { people: false, whitelist: false, gray: false },
     whitelist: { apps: [], contacts: [] },
-    settings: { pointer: 'hand', sounds: true, speed: 1, depth: false },
+    settings: { pointer: 'hand', sounds: true, speed: 1, depth: false, glass: 'tinted' },
   };
 }
 

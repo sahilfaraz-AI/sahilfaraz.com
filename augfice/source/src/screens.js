@@ -1,7 +1,7 @@
 // Every screen of the Aug-Fice flow, drawn on the 1920 x 1080 frame from the hi-fi design:
 // splash, mode, environment, customize, session, to-do, people indicator, whitelisting, grayscale fade, work and break.
 import { C, HEAD, T } from './theme.js';
-import { SHAPES, SHAPE_LABEL, BGS, BG_LABEL, ENVS, ENV_LABEL, APPS, APP_ICON, transparencyLabel, fmtTime } from './store.js';
+import { SHAPES, SHAPE_LABEL, BGS, BG_LABEL, TINTS, TINT_LABEL, TINT_HEX, ENVS, ENV_LABEL, APPS, APP_ICON, transparencyLabel, fmtTime } from './store.js';
 
 const CX = 960;
 const INFO = {
@@ -10,6 +10,8 @@ const INFO = {
   transparency: 'How much of the room shows through. Low hides the most.',
   distance: 'How far away the partition sits. It starts at desk height, so your workstation stays in view.',
   people: 'Shows a marker for people nearby while the partition is more than half opaque. Brighter means closer.',
+  tint: 'Recolours the partition. Original keeps the texture as designed. Sage and Sand are the Aug-Fice green and gold.',
+  glass: 'Tinted keeps text easiest to read. Clear lets more of the room show through the windows.',
   gray: 'Fades colour from your view 5 seconds before a break and keeps it muted until the break ends.',
   duration: 'How long each work set lasts.',
   sets: 'How many work sets make up the session.',
@@ -30,7 +32,8 @@ function header(p, app, o = {}) {
   p.iconButton('lock', 92, 86, 76, w.locked ? 'lock' : 'unlock', { color: w.locked ? C.green : C.white, plate: w.locked, fill: 'rgba(139,195,74,0.16)' }, () => app.toggleLock());
   if (app.canBack() && o.back !== false) p.iconButton('back', 186, 86, 76, 'chevron-left', { color: C.white, plate: false }, () => app.back());
   if (o.close) p.iconButton('close', 1828, 86, 76, 'x', { color: C.white, plate: false }, () => app.back());
-  else if (o.gear !== false) p.iconButton('gear', 1828, 86, 76, 'settings', { color: C.white, plate: false }, () => app.go('settings'));
+  else if (o.gear !== false) p.iconButton('gear', 1828, 86, 76, 'settings', { color: C.white, plate: false }, () => app.openSettings());
+  if (o.customize) p.button('customize', 160, 50, 330, 72, 'Customize', { kind: 'plain', icon: 'layers', size: 28 }, () => app.openSettings('space'));
 }
 
 function card(p, id, x, y, w, h, onClick) {
@@ -75,14 +78,45 @@ function slider(p, id, a, frac, value, onChange, onNudge) {
 }
 
 function segmented(p, id, a, options, index, onSelect, width) {
-  const w = width ?? Math.min(a.w - 40, options.length * 250), x = a.x + (a.w - w) / 2, h = 64, y = a.y + (a.h - h) / 2, sw = w / options.length, c = p.ctx;
+  const w = width ?? Math.min(a.w - 40, options.length * 250), x = a.x + (a.w - w) / 2, h = Math.min(64, a.h - 8), y = a.y + (a.h - h) / 2, sw = w / options.length, c = p.ctx;
   p.rr(x, y, w, h, h / 2); c.fillStyle = 'rgba(0,0,0,0.22)'; c.fill();
   options.forEach((label, i) => {
     const sx = x + i * sw, on = i === index;
     if (on) { p.rr(sx + 5, y + 5, sw - 10, h - 10, (h - 10) / 2); c.fillStyle = C.green; c.fill(); }
-    p.text(label, sx + sw / 2, y + h / 2 + 2, { size: 30, weight: on ? 700 : 400, align: 'center', color: on ? C.ink : C.white });
+    p.text(label, sx + sw / 2, y + h / 2 + 2, { size: 30, weight: on ? 700 : 400, align: 'center', color: on ? C.ink : C.white, maxW: sw - 24 });
     if (!on) p.region(id + '-' + i, sx, y - 10, sw, h + 20, { r: h / 2, hx: sx + 5, hy: y + 5, hw: sw - 10, hh: h - 10, onClick: () => onSelect(i) });
   });
+}
+
+// Colour swatches. The chosen one gets a ring; the name shows to the right.
+function swatches(p, id, a, keys, hexes, labels, current, onSelect) {
+  const c = p.ctx, cy = a.y + a.h / 2, d = 50, gap = 112, x0 = a.x + 70;
+  keys.forEach((k, i) => {
+    const cx = x0 + i * gap, on = k === current;
+    c.beginPath(); c.arc(cx, cy, d / 2, 0, Math.PI * 2); c.fillStyle = hexes[k]; c.fill();
+    if (k === 'original') { c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,0.35)'; c.stroke(); }
+    if (on) { c.beginPath(); c.arc(cx, cy, d / 2 + 9, 0, Math.PI * 2); c.lineWidth = 3.5; c.strokeStyle = C.whiteHi; c.stroke(); }
+    if (!on) p.region(id + '-' + k, cx - 44, a.y + 2, 88, a.h - 4, { r: 44, hx: cx - 38, hy: cy - 38, hw: 76, hh: 76, onClick: () => onSelect(k) });
+  });
+  p.text(labels[current], a.x + a.w - 40, cy + 2, { size: T.body1, align: 'right', color: C.whiteHi });
+}
+
+// The partition controls. Shared by Customize (during setup) and Settings, Space (any time, live).
+function spaceRows(p, app, y, step, h) {
+  const s = app.store, pr = s.preset, zen = s.session && s.session.mode === 'zen';
+  const set = (k, v) => { pr[k] = v; s.changed(); };
+  const bgNow = zen ? s.data.zen.scene : (app.sessionBg || pr.bg);
+  const setBg = (v) => { if (zen) s.data.zen.scene = v; else pr.bg = v; app.sessionBg = null; s.changed(); };
+  segmented(p, 'shape', row(p, app, y, 'Shape', 'shape', h), SHAPES.map((k) => SHAPE_LABEL[k]), SHAPES.indexOf(pr.shape), (i) => set('shape', SHAPES[i]), 820); y += step;
+  segmented(p, 'bg', row(p, app, y, zen ? 'Scene' : 'Texture', 'bg', h), BGS.map((k) => BG_LABEL[k]), BGS.indexOf(bgNow), (i) => setBg(BGS[i]), 820); y += step;
+  swatches(p, 'tint', row(p, app, y, 'Colour', 'tint', h), TINTS, TINT_HEX, TINT_LABEL, pr.tint || 'original', (k) => set('tint', k)); y += step;
+  slider(p, 'tr', row(p, app, y, 'Transparency', 'transparency', h), (pr.transparency - 0.1) / 0.8, transparencyLabel(pr.transparency),
+    (f) => set('transparency', Math.round((0.1 + f * 0.8) * 100) / 100), (d) => set('transparency', Math.round(clampStep(pr.transparency, d * 0.1, 0.1, 0.9) * 100) / 100)); y += step;
+  slider(p, 'dist', row(p, app, y, 'Distance', 'distance', h), (pr.distanceFt - 2) / 10, pr.distanceFt + ' ft',
+    (f) => set('distanceFt', Math.round((2 + f * 10) * 2) / 2), (d) => set('distanceFt', clampStep(pr.distanceFt, d * 0.5, 2, 12))); y += step;
+  onOff(p, 'people', row(p, app, y, 'People indicator', 'people', h), pr.people, (v) => set('people', v)); y += step;
+  onOff(p, 'gray', row(p, app, y, 'Grayscale fade', 'gray', h), pr.gray, (v) => set('gray', v)); y += step;
+  return y;
 }
 
 function onOff(p, id, a, value, onSet) { segmented(p, id, a, ['Off', 'On'], value ? 1 : 0, (i) => onSet(i === 1), 300); }
@@ -158,22 +192,8 @@ const SCREENS = {
     p.text('CUSTOMIZE', x0, 196, { ...o, color: C.white });
     p.ctx.strokeStyle = 'rgba(255,255,255,0.38)'; p.ctx.lineWidth = 2.5; p.rr(x0 + w1 + 40, 140, w2 + 48, 108, 18); p.ctx.stroke();
     p.text(name, x0 + w1 + 64, 196, { ...o, color: C.whiteHi });
-    const set = (k, v) => { pr[k] = v; s.changed(); };
-    let y = 296; const step = 98;
-    stepper(p, 'shape', row(p, app, y, 'Partition shape', 'shape'), SHAPE_LABEL[pr.shape], () => set('shape', cycle(SHAPES, pr.shape, -1)), () => set('shape', cycle(SHAPES, pr.shape, 1)));
-    y += step;
-    stepper(p, 'bg', row(p, app, y, 'Partition background', 'bg'), BG_LABEL[pr.bg], () => set('bg', cycle(BGS, pr.bg, -1)), () => set('bg', cycle(BGS, pr.bg, 1)));
-    y += step;
-    slider(p, 'tr', row(p, app, y, 'Partition transparency', 'transparency'), (pr.transparency - 0.1) / 0.8, transparencyLabel(pr.transparency),
-      (f) => set('transparency', Math.round((0.1 + f * 0.8) * 100) / 100), (d) => set('transparency', Math.round(clampStep(pr.transparency, d * 0.1, 0.1, 0.9) * 100) / 100));
-    y += step;
-    slider(p, 'dist', row(p, app, y, 'Partition distance', 'distance'), (pr.distanceFt - 2) / 10, pr.distanceFt + ' ft',
-      (f) => set('distanceFt', Math.round((2 + f * 10) * 2) / 2), (d) => set('distanceFt', clampStep(pr.distanceFt, d * 0.5, 2, 12)));
-    y += step;
-    onOff(p, 'people', row(p, app, y, 'People indicator', 'people'), pr.people, (v) => set('people', v));
-    y += step;
-    onOff(p, 'gray', row(p, app, y, 'Grayscale fade', 'gray'), pr.gray, (v) => set('gray', v));
-    p.button('done', 740, 916, 440, 88, 'Done', { kind: 'primary' }, () => app.back());
+    spaceRows(p, app, 286, 88, 76);
+    p.button('done', 740, 926, 440, 88, 'Done', { kind: 'primary' }, () => app.back());
     infoPopover(p, app);
   },
 
@@ -311,7 +331,7 @@ const SCREENS = {
     const s = app.store.session;
     if (!s) return;
     const A = app.accentHex, zen = s.mode === 'zen', brk = s.phase === 'break' || s.phase === 'longBreak';
-    header(p, app, { back: false });
+    header(p, app, { back: false, customize: true });
     const pl = app.people;
     if (app.store.preset.people) p.icon('user-fill', 1736, 86, 50, C.gold, pl.nearestBand < 0 ? 0.28 : [1, 0.7, 0.45][pl.nearestBand]);
     const rx = app.window.ringCxTarget;
@@ -354,28 +374,48 @@ const SCREENS = {
   },
 
   settings(p, app) {
-    header(p, app, { close: true });
-    title(p, 'SETTINGS', 190, 84);
-    const s = app.store, st = s.data.settings, set = (k, v) => { st[k] = v; s.changed(); app.applySettings(); };
-    let y = 270; const step = 96;
-    if (app.xr) { segmented(p, 'ptr', row(p, app, y, 'Pointer', 'pointer', 80), ['Hand ray', 'Head tracking'], st.pointer === 'head' ? 1 : 0, (i) => set('pointer', i ? 'head' : 'hand'), 540); y += step; }
-    onOff(p, 'snd', row(p, app, y, 'Sounds', null, 80), st.sounds, (v) => set('sounds', v)); y += step;
-    segmented(p, 'spd', row(p, app, y, 'Timer speed', 'speed', 80), ['Real time', 'Demo'], st.speed > 1 ? 1 : 0, (i) => set('speed', i ? 30 : 1), 540); y += step;
-    if (app.xr && app.depthAvailable) { onOff(p, 'dep', row(p, app, y, 'Nearby things show through', 'depth', 80), st.depth, (v) => set('depth', v)); y += step; }
-    let a = row(p, app, y, 'Workspace position', null, 80);
-    p.button('recenter', a.x + a.w / 2 - 190, y + 9, 380, 62, 'Recenter on me', { kind: 'plain', icon: 'locate-fixed', upper: false, size: 30 }, () => app.recenter(true)); y += step;
-    a = row(p, app, y, 'Feature introductions', null, 80);
-    p.button('tips', a.x + a.w / 2 - 190, y + 9, 380, 62, 'Show again', { kind: 'plain', icon: 'rotate-ccw', upper: false, size: 30 }, () => app.resetTips()); y += step;
-    toast(p, app, y + 26);
+    const s = app.store, st = s.data.settings, sess = s.session && s.session.phase !== 'done' ? s.session : null;
+    const tab = app.settingsTab || 'space';
+    header(p, app, { close: true, back: false });
+    // A live session keeps running behind Settings, so its time stays in view.
+    if (sess) {
+      const brk = sess.phase === 'break' || sess.phase === 'longBreak', A = brk ? C.gold : C.green;
+      const lab = sess.mode === 'zen' ? 'ZEN' : sess.phase === 'longBreak' ? 'LONG BREAK' : brk ? 'BREAK' : 'SET #' + sess.set;
+      const t = sess.mode === 'zen' && !sess.total ? fmtTime(sess.elapsed + 0.999) : fmtTime(s.remaining());
+      const txt = lab + '   ' + t + (sess.paused ? '   PAUSED' : ''), o = { size: 30, weight: 700, ls: 2 };
+      const w = p.measure(txt, o) + 64;
+      p.rr(CX - w / 2, 58, w, 56, 28); p.ctx.fillStyle = brk ? 'rgba(217,195,126,0.14)' : 'rgba(139,195,74,0.14)'; p.ctx.fill();
+      p.text(txt, CX, 88, { ...o, align: 'center', color: A });
+      p.region('chip', CX - w / 2, 58, w, 56, { r: 28, onClick: () => app.back() });
+    }
+    title(p, 'SETTINGS', 178, 76);
+    segmented(p, 'tab', { x: 150, y: 228, w: 1620, h: 72 }, ['Space', 'App'], tab === 'space' ? 0 : 1, (i) => { app.settingsTab = i ? 'app' : 'space'; app.info = null; app.redraw(); }, 520);
+    const y0 = 322, step = 78, h = 66;
+    if (tab === 'space') {
+      spaceRows(p, app, y0, step, h);
+      p.text(`Changes apply now and save to your ${ENV_LABEL[s.data.env]} preset.`, CX, 894, { size: 27, align: 'center', color: C.dim });
+    } else {
+      const set = (k, v) => { st[k] = v; s.changed(); app.applySettings(); };
+      let y = y0;
+      if (app.xr) { segmented(p, 'ptr', row(p, app, y, 'Pointer', 'pointer', h), ['Hand ray', 'Head tracking'], st.pointer === 'head' ? 1 : 0, (i) => set('pointer', i ? 'head' : 'hand'), 540); y += step; }
+      segmented(p, 'glass', row(p, app, y, 'Window glass', 'glass', h), ['Tinted', 'Clear'], st.glass === 'clear' ? 1 : 0, (i) => set('glass', i ? 'clear' : 'tinted'), 540); y += step;
+      onOff(p, 'snd', row(p, app, y, 'Sounds', null, h), st.sounds, (v) => set('sounds', v)); y += step;
+      segmented(p, 'spd', row(p, app, y, 'Timer speed', 'speed', h), ['Real time', 'Demo'], st.speed > 1 ? 1 : 0, (i) => set('speed', i ? 30 : 1), 540); y += step;
+      if (app.xr && app.depthAvailable) { onOff(p, 'dep', row(p, app, y, 'Nearby things show through', 'depth', h), st.depth, (v) => set('depth', v)); y += step; }
+      let a = row(p, app, y, 'Workspace position', null, h);
+      p.button('recenter', a.x + a.w / 2 - 190, y + 6, 380, h - 12, 'Recenter on me', { kind: 'plain', icon: 'locate-fixed', upper: false, size: 30 }, () => app.recenter(true)); y += step;
+      a = row(p, app, y, 'Feature introductions', null, h);
+      p.button('tips', a.x + a.w / 2 - 190, y + 6, 380, h - 12, 'Show again', { kind: 'plain', icon: 'rotate-ccw', upper: false, size: 30 }, () => app.resetTips()); y += step;
+    }
+    toast(p, app, 888);
     const btns = [];
-    if (s.session) btns.push(['end', 'End session', 'secondary', () => app.endSession()]);
+    if (sess) btns.push(['end', 'End session', 'secondary', () => app.endSession()]);
     if (app.xr) btns.push(['exit', 'Exit mixed reality', 'secondary', () => app.exitXR()]);
     else if (app.started) btns.push(['exit', 'Exit preview', 'secondary', () => app.exitPreview()]);
-    btns.push(['done', 'Done', 'primary', () => app.back()]);
+    btns.push(['done', sess ? 'Back to session' : 'Done', 'primary', () => app.back()]);
     const widths = btns.map((b) => Math.max(240, p.measure(b[1].toUpperCase(), { size: 32, weight: 600, ls: 1.6 }) + 110));
     let x = CX - (widths.reduce((q, w) => q + w, 0) + (btns.length - 1) * 28) / 2;
-    btns.forEach((b, i) => { p.button(b[0], x, 916, widths[i], 88, b[1], { kind: b[2] }, b[3]); x += widths[i] + 28; });
-    p.text('Aug-Fice. Concept and design by Sahil Faraz.', CX, 1042, { size: 24, align: 'center', color: C.dim });
+    btns.forEach((b, i) => { p.button(b[0], x, 930, widths[i], 88, b[1], { kind: b[2] }, b[3]); x += widths[i] + 28; });
     infoPopover(p, app);
   },
 };

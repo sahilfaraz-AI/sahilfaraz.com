@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { C, loadFonts } from './theme.js';
 import { loadIcons } from './icons.js';
-import { Store, BGS } from './store.js';
+import { Store, BGS, TINT_HEX } from './store.js';
 import { MainWindow } from './window.js';
 import { Keyboard } from './keyboard.js';
 import { Partition, makeNoiseTexture } from './partition.js';
@@ -213,6 +213,12 @@ class App {
     try { const g = p && p.source && p.source.gamepad; if (g && g.hapticActuators && g.hapticActuators[0]) g.hapticActuators[0].pulse(strength, 18); } catch (e) { /* no haptics */ }
   }
 
+  openSettings(tab) {
+    const s = this.store.session;
+    this.settingsTab = tab || (s && s.phase !== 'done' ? 'space' : (this.settingsTab || 'space'));
+    this.go('settings');
+  }
+
   toggleLock() { this.window.locked = !this.window.locked; this.toastSilent(); this.redraw(); }
   toastSilent() { /* the lock icon itself shows the state */ }
 
@@ -320,8 +326,9 @@ class App {
     const st = this.store, s = st.session, pre = st.preset, scr = this.pending || st.screen, pt = this.partition;
     const alpha = THREE.MathUtils.clamp(1.22 - 0.98 * pre.transparency, 0.15, 0.97);
     let opacity = 0, reveal = 0, sat = 1, veil = 0, bg = pre.bg, brk = false;
-    if (scr === 'customizeEnv') { opacity = alpha; reveal = 1; }
-    if (s && s.phase !== 'done' && scr !== 'customizeEnv') {
+    const spaceEdit = scr === 'customizeEnv' || (scr === 'settings' && this.settingsTab === 'space');
+    if (spaceEdit && !(s && s.phase !== 'done')) { opacity = alpha; reveal = 1; bg = pre.bg; }
+    if (s && s.phase !== 'done') {
       const left = (s.total - s.elapsed) / st.speed; // real seconds
       if (s.phase === 'zen') { opacity = alpha; reveal = 1; bg = st.data.zen.scene; }
       else if (s.phase === 'work') {
@@ -337,6 +344,7 @@ class App {
     }
     pt.configure(pre.shape, pre.distanceFt);
     pt.setBackground(bg);
+    pt.setTint(pre.tint && pre.tint !== 'original' ? TINT_HEX[pre.tint] : null);
     pt.target.opacity = opacity; pt.target.reveal = reveal; pt.target.sat = sat;
     pt.material.depthTest = !(this.xr && this.depthAvailable && !st.data.settings.depth);
     pt.update(dt, this.time);
@@ -350,10 +358,10 @@ class App {
     const accent = brk ? C.gold : C.green;
     if (accent !== this.accentHex) { this.accentHex = accent; this.redraw(); }
     this.window.setAccent(accent, brk ? 1 : 0);
-    this.window.dock(!!s && s.phase !== 'done', this.xr ? 36 : 12, this.xr ? 0.66 : 0.62);
+    this.window.dock(!!s && s.phase !== 'done' && scr === 'work', this.xr ? 36 : 12, this.xr ? 0.66 : 0.62);
 
     // people indicator
-    const active = (s && (s.phase === 'work' || s.phase === 'zen')) || scr === 'customizeEnv';
+    const active = (s && (s.phase === 'work' || s.phase === 'zen')) || spaceEdit;
     const want = pre.people && pre.transparency < 0.5;
     let det = [];
     if (this.xr && this.xrMode === 'immersive-ar') { if (want && active) this.depth.sample(this.renderer, this.time, pt.group); det = want ? this.depth.detections : []; }
@@ -389,7 +397,7 @@ class App {
     // window furniture
     const scr = st.screen, s = st.session;
     w.logoTarget = scr === 'splash' ? 0 : 1;
-    w.logoAlphaTarget = scr === 'work' ? 0 : w.contentFade < 0.5 && (this.pending === 'work') ? 0 : 1;
+    w.logoAlphaTarget = scr === 'work' || (scr === 'settings' && s && s.phase !== 'done') ? 0 : w.contentFade < 0.5 && (this.pending === 'work') ? 0 : 1;
     w.ringAlphaTarget = scr === 'work' && s ? 1 : 0;
     if (s) {
       const zen = s.mode === 'zen', ru = w.ring.material.uniforms;
@@ -397,8 +405,10 @@ class App {
       ru.uProgress.value = s.total > 0 ? THREE.MathUtils.clamp(1 - s.elapsed / s.total, 0, 1) : 1;
       ru.uPulse.value = zen && !s.paused ? 0.5 + 0.5 * Math.sin(this.time * Math.PI * 2 / 10) : 0;
       const key = scr + '|' + s.phase + '|' + s.set + '|' + s.paused + '|' + Math.ceil(s.total > 0 ? s.total - s.elapsed : s.elapsed) + '|' + this.people.nearestBand;
-      if (scr === 'work' && key !== this.lastKey) { this.lastKey = key; this.redraw(); }
+      if ((scr === 'work' || scr === 'settings') && key !== this.lastKey) { this.lastKey = key; this.redraw(); }
     }
+    const ga = this.store.data.settings.glass === 'clear' ? 0.66 : 0.92, gu = w.panel.uniforms.uGlassAlpha;
+    gu.value += (ga - gu.value) * (1 - Math.exp(-dt * 6));
     w.update(dt);
     this.keyboard.update(dt, this.time);
     if (w.panel.dirty && this.fadeDir >= 0) drawScreen(w.panel, this);

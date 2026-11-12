@@ -51,7 +51,7 @@ precision highp float;
 uniform sampler2D uNoise;
 uniform float uOpacity, uReveal, uSat, uTime, uMix, uBlinds, uBottom, uEye;
 uniform int uBgA, uBgB;
-uniform vec2 uYaw;
+uniform vec2 uYaw; uniform vec3 uTintCol; uniform float uTintAmt;
 varying vec2 vSurf; varying vec3 vEdge; varying vec3 vWorld;
 
 // Texture 1: the dusty teal background people chose in the preference test.
@@ -119,6 +119,9 @@ vec3 bg(int id) {
 void main() {
   vec3 col = bg(uBgA);
   if (uMix > 0.002) col = mix(col, bg(uBgB), uMix);
+  // Colour tint: keeps the texture's light and shade, swaps its hue.
+  float tl = dot(col, vec3(0.30, 0.59, 0.11));
+  col = mix(col, uTintCol * tl * 2.0, uTintAmt * 0.7);
   float alpha = uOpacity;
   if (uBlinds > 0.5) {
     float f = fract((vWorld.y - uBottom) / 0.118);
@@ -161,7 +164,7 @@ export class Partition {
     this.uniforms = {
       uNoise: { value: noise }, uOpacity: { value: 0 }, uReveal: { value: 0 }, uSat: { value: 1 }, uTime: { value: 0 },
       uMix: { value: 0 }, uBlinds: { value: 0 }, uBottom: { value: 0.75 }, uEye: { value: 1.2 }, uBgA: { value: 0 }, uBgB: { value: 0 },
-      uYaw: { value: new THREE.Vector2(1, 0) },
+      uYaw: { value: new THREE.Vector2(1, 0) }, uTintCol: { value: new THREE.Color(1, 1, 1) }, uTintAmt: { value: 0 },
     };
     this.material = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms: this.uniforms,
       transparent: true, depthWrite: false, depthTest: true, side: THREE.DoubleSide });
@@ -172,6 +175,13 @@ export class Partition {
     this.shape = null; this.distance = 0; this.key = '';
     this.target = { opacity: 0, reveal: 0, sat: 1 };
     this.bg = 'tex1'; this.mixing = false;
+    this.tintTarget = new THREE.Color(1, 1, 1); this.tintAmtTarget = 0;
+  }
+
+  setTint(hex) {
+    if (!hex) { this.tintAmtTarget = 0; return; }
+    this.tintTarget.set(hex); this.tintAmtTarget = 1;
+    if (this.uniforms.uTintAmt.value < 0.01) this.uniforms.uTintCol.value.copy(this.tintTarget);
   }
 
   // Seat the partition around the person: head position on the floor plane, facing the way they face.
@@ -257,6 +267,8 @@ export class Partition {
     u.uOpacity.value = ease(u.uOpacity.value, t.opacity, 2.2);
     u.uReveal.value = ease(u.uReveal.value, t.reveal, 1.5);
     u.uSat.value = ease(u.uSat.value, t.sat, 1.4);
+    u.uTintAmt.value = ease(u.uTintAmt.value, this.tintAmtTarget, 3);
+    u.uTintCol.value.lerp(this.tintTarget, 1 - Math.exp(-dt * 3));
     if (this.mixing) { u.uMix.value = Math.min(1, u.uMix.value + dt / 2.5); if (u.uMix.value >= 1) { u.uBgA.value = u.uBgB.value; u.uMix.value = 0; this.mixing = false; } }
     this.mesh.visible = u.uOpacity.value > 0.004 && u.uReveal.value > 0.004;
   }
