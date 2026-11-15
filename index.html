@@ -4013,6 +4013,31 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
   .tread-host .rip { display: none; }
 }
 .navdrop .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* How I work: alignment motion graphic. Hidden until its script has built it. */
+.huddle { display: none; margin: 0 0 clamp(28px, 4vw, 56px); }
+.huddle.is-ready { display: block; }
+.huddle__stage {
+  position: relative; overflow: hidden; aspect-ratio: 1200 / 380;
+  border: 1px solid var(--line); border-radius: var(--plate-r);
+  background: linear-gradient(180deg, rgba(244, 243, 232, .03), rgba(244, 243, 232, 0) 70%);
+}
+.huddle__stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.huddle__stage text { font-family: var(--f-mono); letter-spacing: .04em; }
+.huddle__cap {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 14px;
+  font-family: var(--f-mono); font-size: 13px; letter-spacing: .02em; color: var(--ink-3);
+}
+.huddle__replay {
+  flex: none; font: inherit; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink); background: none; border: 1px solid var(--line); border-radius: 2px;
+  padding: 7px 12px; cursor: pointer; transition: color .2s, border-color .2s;
+}
+.huddle__replay:hover { color: var(--lime); border-color: var(--lime); }
+.huddle__replay:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+@media (max-width: 720px) {
+  .huddle__stage { aspect-ratio: 360 / 470; }
+  .huddle__cap { align-items: flex-start; flex-direction: column; gap: 10px; }
+}
 </style>
 <script src="assets/analytics.js" defer></script>
 <link rel="stylesheet" href="assets/scout.css">
@@ -4337,6 +4362,13 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
         <h2 id="how-h" class="sec-title" data-split>How I work</h2>
         <p class="how__lede">I spent years breaking products as a tester before I started designing them. That shaped these habits.</p>
       </header>
+      <figure class="huddle" data-huddle aria-labelledby="huddle-cap">
+        <div class="huddle__stage" data-huddle-stage role="img" aria-label="Animation. A team stands scattered and unsure. Sahil walks in with one draft journey, the team lines up along it, and two edge cases are flagged and cleared long before launch."></div>
+        <figcaption class="huddle__cap" id="huddle-cap">
+          <span>One scenario, one room. The gaps show up while a change is still cheap.</span>
+          <button type="button" class="huddle__replay" data-huddle-replay>Replay</button>
+        </figcaption>
+      </figure>
       <ol class="how__list">
         <li class="how__item">
           <svg class="ic ic--lg" aria-hidden="true"><use href="#i-users"/></svg>
@@ -4347,8 +4379,9 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
         <li class="how__item">
           <svg class="ic ic--lg" aria-hidden="true"><use href="#i-route"/></svg>
           <h3>Turn the mess into a journey</h3>
-          <p>Complex engineering problems become user journeys that anyone in the room can follow and argue with.</p>
-                  </li>
+          <p>I walk in with a draft journey for one real scenario, so engineering, research, integration and performance react to the same thing. Evidence and assumptions are marked apart, and I ask the room to break it.</p>
+          <p class="how__proof"><b>Edge cases</b> surface years before launch, while a change is still cheap.</p>
+        </li>
         <li class="how__item">
           <svg class="ic ic--lg" aria-hidden="true"><use href="#i-bug"/></svg>
           <h3>Break it before users do</h3>
@@ -10564,6 +10597,243 @@ window.TechText = (container, props = {}) => {
 
 
 window.__pfStart();
+
+</script>
+<script>
+/* How I work: the alignment graphic.
+   A scattered team, one facilitator who walks in with a draft journey, the team lining up along it,
+   and two edge cases flagged and cleared long before launch. Plain GSAP, one timeline, drawn in SVG. */
+(() => {
+  const fig = document.querySelector('[data-huddle]');
+  const G = window.gsap;
+  if (!fig || !G) return;
+  const stage = fig.querySelector('[data-huddle-stage]');
+  const replay = fig.querySelector('[data-huddle-replay]');
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = getComputedStyle(document.documentElement);
+  const v = (n, d) => (css.getPropertyValue(n).trim() || d);
+  const col = {
+    ink: v('--ink', '#F4F3E8'), ink2: v('--ink-2', '#C9C8BB'), ink3: v('--ink-3', '#A3A296'),
+    lime: v('--lime', '#EBFC72'), sig: v('--signal', '#E2231A'), paper: v('--paper', '#13140E'),
+    line: v('--line', 'rgba(244,243,232,.16)')
+  };
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const small = () => window.innerWidth <= 720;
+
+  const make = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach((k) => e.setAttribute(k, attrs[k]));
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const label = (parent, text, attrs) => { const t = make('text', attrs, parent); t.textContent = text; return t; };
+
+  // Two layouts: a wide strip, and a tall one for phones.
+  const LAYOUT = {
+    wide: {
+      W: 1200, H: 380, fs: 12, axis: { y: 342, x0: 56, x1: 1144 }, ticks: [196, 318],
+      fac: { from: [-40, 160], to: [128, 160] },
+      nodes: [[236, 160], [420, 112], [604, 168], [800, 114], [988, 160]],
+      team: [['PM', 236, 262, 0], ['UXR', 420, 262, 1], ['UI', 560, 262, 2], ['DEV', 650, 262, 2], ['INT', 800, 262, 3], ['PERF', 988, 262, 4]],
+      start: [[372, 96], [520, 236], [690, 84], [786, 250], [930, 100], [1070, 236]],
+      flag: { dx: 0, dy: -50, stem: [0, -39, 0, -10] }
+    },
+    tall: {
+      W: 360, H: 470, fs: 11, axis: { y: 436, x0: 24, x1: 336 }, ticks: [74, 122],
+      fac: { from: [-30, 60], to: [38, 60] },
+      nodes: [[92, 60], [156, 132], [96, 204], [160, 276], [104, 348]],
+      team: [['PM', 292, 60, 0], ['UXR', 292, 132, 1], ['UI', 292, 190, 2], ['DEV', 292, 232, 2], ['INT', 292, 276, 3], ['PERF', 292, 348, 4]],
+      start: [[70, 120], [250, 90], [200, 210], [90, 300], [260, 330], [170, 390]],
+      flag: { dx: -86, dy: 0, stem: [-44, 0, -10, 0] }
+    }
+  };
+
+  let tl = null, wob = [], layoutName = null, played = false, visible = false;
+
+  const smooth = (p) => {
+    let d = 'M' + p[0][0] + ' ' + p[0][1];
+    for (let i = 0; i < p.length - 1; i++) {
+      const a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
+      d += ' C' + (b[0] + (c[0] - a[0]) / 6) + ' ' + (b[1] + (c[1] - a[1]) / 6) + ' ' +
+        (c[0] - (e[0] - b[0]) / 6) + ' ' + (c[1] - (e[1] - b[1]) / 6) + ' ' + c[0] + ' ' + c[1];
+    }
+    return d;
+  };
+  const dash = (el) => { const L = el.getTotalLength ? el.getTotalLength() : 100; el.style.strokeDasharray = L; el.style.strokeDashoffset = L; return L; };
+
+  function build() {
+    if (tl) tl.kill();
+    wob.forEach((w) => w.kill());
+    wob = [];
+    stage.textContent = '';
+    layoutName = small() ? 'tall' : 'wide';
+    const Z = LAYOUT[layoutName];
+    const svg = make('svg', { viewBox: '0 0 ' + Z.W + ' ' + Z.H, preserveAspectRatio: 'xMidYMid meet', 'aria-hidden': 'true', focusable: 'false' }, stage);
+    const fs = Z.fs;
+
+    // layers, back to front
+    const gMess = make('g', {}, svg), gAxis = make('g', {}, svg), gLinks = make('g', {}, svg), gPath = make('g', {}, svg);
+    const gNodes = make('g', {}, svg), gFlags = make('g', {}, svg), gTeam = make('g', {}, svg), gFac = make('g', {}, svg);
+
+    // time axis: today on the left, launch on the right
+    make('line', { x1: Z.axis.x0, y1: Z.axis.y, x2: Z.axis.x1, y2: Z.axis.y, stroke: col.line, 'stroke-width': 1 }, gAxis);
+    [Z.axis.x0, Z.axis.x1].forEach((x) => make('line', { x1: x, y1: Z.axis.y - 6, x2: x, y2: Z.axis.y + 6, stroke: col.ink3, 'stroke-width': 1 }, gAxis));
+    label(gAxis, 'TODAY', { x: Z.axis.x0, y: Z.axis.y + 26, fill: col.ink3, 'font-size': fs, 'text-anchor': 'start' });
+    label(gAxis, 'LAUNCH', { x: Z.axis.x1, y: Z.axis.y + 26, fill: col.ink3, 'font-size': fs, 'text-anchor': 'end' });
+    const ticks = Z.ticks.map((x) => make('line', { x1: x, y1: Z.axis.y - 9, x2: x, y2: Z.axis.y + 9, stroke: col.sig, 'stroke-width': 2, opacity: 0 }, gAxis));
+
+    // the mess: loose lines that go nowhere
+    const mess = Z.start.map((p, i) => {
+      const q = Z.start[(i + 2) % Z.start.length];
+      const mx = (p[0] + q[0]) / 2 + (i % 2 ? 40 : -40), my = (p[1] + q[1]) / 2 + (i % 2 ? -34 : 34);
+      return make('path', { d: 'M' + p[0] + ' ' + p[1] + ' Q' + mx + ' ' + my + ' ' + q[0] + ' ' + q[1], fill: 'none', stroke: col.ink3, 'stroke-width': 1, 'stroke-dasharray': '3 6', opacity: 0.35 }, gMess);
+    });
+
+    // the draft journey
+    const f = Z.fac.to;
+    const pts = [f].concat(Z.nodes);
+    const path = make('path', { d: smooth(pts), fill: 'none', stroke: col.lime, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, gPath);
+    const pathLen = dash(path);
+    const seg = pts.map((p, i) => (i ? Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0));
+    const total = seg.reduce((a, b) => a + b, 0);
+    let run = 0;
+    const frac = seg.map((s) => (run += s) / total); // where each point sits along the path
+
+    const nodes = Z.nodes.map((p) => {
+      const g = make('g', {}, gNodes);
+      const c = make('circle', { r: 7, fill: col.paper, stroke: col.lime, 'stroke-width': 2 }, g);
+      const ring = make('circle', { r: 7, fill: 'none', stroke: col.sig, 'stroke-width': 1.5, opacity: 0 }, g);
+      G.set(g, { x: p[0], y: p[1], scale: 0, transformOrigin: '0 0' });
+      return { g, c, ring, p };
+    });
+
+    // flags on nodes 2 and 4
+    const flags = [1, 3].map((ni) => {
+      const n = nodes[ni].p, F = Z.flag;
+      const g = make('g', {}, gFlags);
+      const stem = make('line', { x1: n[0] + F.stem[0], y1: n[1] + F.stem[1], x2: n[0] + F.stem[2], y2: n[1] + F.stem[3], stroke: col.sig, 'stroke-width': 1.5 }, g);
+      const pill = make('g', {}, g);
+      const box = make('rect', { x: -43, y: -12, width: 86, height: 24, rx: 2, fill: col.paper, stroke: col.sig, 'stroke-width': 1.5 }, pill);
+      const txt = label(pill, 'EDGE CASE', { x: 0, y: 4, fill: col.sig, 'font-size': fs - 1, 'text-anchor': 'middle' });
+      G.set(pill, { x: n[0] + F.dx, y: n[1] + F.dy });
+      G.set(g, { opacity: 0 });
+      dash(stem);
+      return { g, stem, box, txt, pill, ni };
+    });
+
+    // the team
+    const team = Z.team.map((t, i) => {
+      const s = Z.start[i];
+      const pos = make('g', {}, gTeam), wobble = make('g', {}, pos);
+      const dot = make('circle', { r: 9, fill: col.ink3, opacity: 0.85 }, wobble);
+      label(wobble, t[0], { x: 0, y: 28, fill: col.ink3, 'font-size': fs - 1, 'text-anchor': 'middle' });
+      const q = label(wobble, '?', { x: 0, y: -16, fill: col.ink2, 'font-size': fs + 4, 'text-anchor': 'middle', opacity: 0 });
+      G.set(pos, { x: s[0], y: s[1] });
+      // each connector runs from the person to the step they own
+      const n = Z.nodes[t[3]], dx = n[0] - t[1], dy = n[1] - t[2], d = Math.hypot(dx, dy);
+      const link = make('line', { x1: t[1] + (dx / d) * 14, y1: t[2] + (dy / d) * 14, x2: n[0] - (dx / d) * 11, y2: n[1] - (dy / d) * 11, stroke: col.ink3, 'stroke-width': 1, 'stroke-dasharray': '2 4', opacity: 0 }, gLinks);
+      return { pos, wobble, dot, q, link, t, s };
+    });
+
+    // facilitator
+    const fPos = make('g', {}, gFac), fBob = make('g', {}, fPos);
+    const ring = make('circle', { r: 20, fill: 'none', stroke: col.lime, 'stroke-width': 1, opacity: 0.45 }, fBob);
+    make('circle', { r: 10, fill: col.lime }, fBob);
+    label(fBob, 'SAHIL', { x: 0, y: 40, fill: col.lime, 'font-size': fs - 1, 'text-anchor': 'middle' });
+    G.set(fPos, { x: Z.fac.from[0], y: Z.fac.from[1] });
+
+    // idle: the team fidgets while nobody leads
+    team.forEach((m, i) => {
+      const a = 9 + (i % 3) * 4;
+      wob.push(G.to(m.wobble, { x: (i % 2 ? 1 : -1) * a, y: (i % 3 ? 1 : -1) * a * 0.8, duration: 1.4 + i * 0.23, ease: 'sine.inOut', repeat: -1, yoyo: true }));
+      wob.push(G.fromTo(m.q, { opacity: 0 }, { opacity: 0.9, duration: 0.7, delay: i * 0.55, repeat: -1, yoyo: true, repeatDelay: 1.1 + (i % 3) * 0.6, ease: 'sine.inOut' }));
+    });
+
+    // the timeline
+    tl = G.timeline({ paused: true, defaults: { ease: 'power2.out' } });
+    const T = { walk: 0.3, draw: 2.1, move: 3.8, flag: 5.6, fix: 7.4 };
+
+    // 1. walk in, with a small hop on every step
+    tl.to(fPos, { x: f[0], y: f[1], duration: 1.7, ease: 'power2.out' }, T.walk);
+    tl.fromTo(fBob, { y: 0 }, { y: -7, duration: 0.17, repeat: 7, yoyo: true, ease: 'sine.inOut' }, T.walk);
+    tl.fromTo(ring, { attr: { r: 20 }, opacity: 0.45 }, { attr: { r: 34 }, opacity: 0, duration: 0.9, ease: 'power1.out' }, T.walk + 1.7);
+
+    // 2. one draft journey for one scenario; the loose lines fade as it draws
+    tl.to(mess, { opacity: 0, duration: 0.9 }, T.draw);
+    tl.to(path, { strokeDashoffset: 0, duration: 1.6, ease: 'power1.inOut' }, T.draw);
+    nodes.forEach((n, i) => tl.to(n.g, { scale: 1, duration: 0.5, ease: 'back.out(2.4)' }, T.draw + 1.6 * frac[i + 1] - 0.25));
+    tl.add(() => wob.forEach((w) => w.pause()), T.move - 0.2);
+    tl.to(team.map((m) => m.q), { opacity: 0, duration: 0.3, overwrite: true }, T.move - 0.3);
+
+    // 3. the room lines up along it, each person next to the step they own
+    team.forEach((m, i) => {
+      tl.to(m.wobble, { x: 0, y: 0, duration: 0.6, ease: 'power2.out' }, T.move + i * 0.07);
+      tl.to(m.pos, { x: m.t[1], y: m.t[2], duration: 1.2, ease: 'power3.inOut' }, T.move + i * 0.07);
+      tl.to(m.dot, { attr: { fill: col.ink }, opacity: 1, duration: 0.6 }, T.move + 0.5 + i * 0.07);
+      tl.to(m.link, { opacity: 0.8, duration: 0.5 }, T.move + 1.2 + i * 0.07);
+    });
+
+    // 4. gaps show up now, not after launch
+    ticks.forEach((t, i) => tl.fromTo(t, { opacity: 0, attr: { y1: Z.axis.y - 40, y2: Z.axis.y - 22 } }, { opacity: 1, attr: { y1: Z.axis.y - 9, y2: Z.axis.y + 9 }, duration: 0.5, ease: 'back.out(2)' }, T.flag + 0.45 * i));
+    flags.forEach((fl, i) => {
+      const n = nodes[fl.ni], at = T.flag + 0.45 * i;
+      tl.to(n.c, { attr: { stroke: col.sig }, duration: 0.25 }, at);
+      tl.fromTo(n.ring, { attr: { r: 7 }, opacity: 0.9, immediateRender: false }, { attr: { r: 28 }, opacity: 0, duration: 0.9, ease: 'power1.out', repeat: 1, immediateRender: false }, at);
+      tl.to(fl.g, { opacity: 1, duration: 0.3 }, at + 0.1);
+      tl.to(fl.stem, { strokeDashoffset: 0, duration: 0.4 }, at + 0.1);
+      tl.fromTo(fl.pill, { scale: 0.7 }, { scale: 1, duration: 0.45, ease: 'back.out(2.4)' }, at + 0.15);
+    });
+
+    // 5. fixed while a change is still cheap
+    flags.forEach((fl, i) => {
+      const n = nodes[fl.ni], at = T.fix + 0.4 * i;
+      tl.to([fl.box, fl.stem], { attr: { stroke: col.lime }, duration: 0.4 }, at);
+      tl.to(n.c, { attr: { stroke: col.lime }, duration: 0.4 }, at);
+      tl.add(() => { fl.txt.textContent = 'RESOLVED'; fl.txt.setAttribute('fill', col.lime); }, at + 0.15);
+      tl.to(ticks[i], { attr: { stroke: col.lime }, duration: 0.4 }, at);
+    });
+    tl.to(path, { attr: { 'stroke-width': 3.2 }, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut' }, T.fix + 0.9);
+    tl.fromTo(ring, { attr: { r: 20 }, opacity: 0.45 }, { attr: { r: 34 }, opacity: 0, duration: 0.9, ease: 'power1.out' }, T.fix + 0.9);
+
+    return tl;
+  }
+
+  function start() { if (!tl || played) return; played = true; tl.play(0); }
+
+  function setup() {
+    fig.classList.add('is-ready');
+    build();
+    fig.__huddle = { get tl() { return tl; }, build, replayNow: () => { build(); played = true; tl.play(0); } };
+    if (reduced.matches) {
+      // no motion: show the finished scene
+      wob.forEach((w) => w.kill());
+      tl.progress(1);
+      if (replay) replay.hidden = true;
+      return;
+    }
+    if (replay) replay.addEventListener('click', () => { build(); played = true; tl.play(0); });
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        visible = e.isIntersecting;
+        if (!played) wob.forEach((w) => (visible ? w.resume() : w.pause()));
+        if (visible && e.intersectionRatio >= 0.55) start();
+      });
+    }, { threshold: [0, 0.55] });
+    io.observe(stage);
+    let rz;
+    window.addEventListener('resize', () => {
+      clearTimeout(rz);
+      rz = setTimeout(() => {
+        if ((small() ? 'tall' : 'wide') === layoutName) return;
+        const was = played;
+        build();
+        if (was) { wob.forEach((w) => w.kill()); tl.progress(1); played = true; }
+      }, 200);
+    });
+  }
+
+  setup();
+})();
 
 </script>
 <script src="assets/scout.js" defer></script>
