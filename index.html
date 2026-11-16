@@ -10581,7 +10581,7 @@ window.__pfStart();
 
 </script>
 <script>
-/* How I work: a small wordless scene.
+/* How I work: a small wordless scene. Pain points are always the low points of the journey line.
    A room of people who are not on the same page. One person walks in with a drawing, pins it up,
    the room turns toward it, two snags show up early, get sorted, and everyone cheers.
    Plain GSAP, one looping timeline, drawn in SVG. */
@@ -10663,7 +10663,7 @@ window.__pfStart();
     [[B.x + 14, B.y + 14], [B.x + B.w - 14, B.y + 14]].forEach((p) => make('circle', { cx: p[0], cy: p[1], r: 3, fill: col.ink3, opacity: 0.6 }, scene));
 
     // the drawing that gets pinned up: one journey with a few stops
-    const fr = [[0.1, 0.66], [0.3, 0.36], [0.5, 0.66], [0.7, 0.34], [0.9, 0.6]];
+    const fr = [[0.1, 0.42], [0.3, 0.72], [0.5, 0.34], [0.7, 0.74], [0.9, 0.3]];
     const pts = fr.map((f) => [B.x + B.w * f[0], B.y + B.h * f[1]]);
     const path = make('path', { d: smooth(pts), fill: 'none', stroke: col.lime, 'stroke-width': Z.line, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, scene);
     const len = path.getTotalLength();
@@ -10702,7 +10702,8 @@ window.__pfStart();
     const bubbles = [0, 2, 4].map((i) => {
       const g = make('g', {}, team[i].drift);
       make('circle', { cx: 0, cy: -112, r: 15, fill: 'rgba(19,20,14,.85)', stroke: col.ink3, 'stroke-width': 1.5 }, g);
-      make('path', { d: 'M-8 -111 c3 -10 6 10 8 0 s6 -10 8 0', fill: 'none', stroke: col.ink3, 'stroke-width': 1.6, 'stroke-linecap': 'round' }, g);
+      const q = make('text', { x: 0, y: -105, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 700, fill: col.ink2 }, g);
+      q.textContent = '?';
       make('circle', { cx: 5, cy: -93, r: 3.2, fill: 'none', stroke: col.ink3, 'stroke-width': 1.3 }, g);
       make('circle', { cx: 2, cy: -85, r: 1.8, fill: 'none', stroke: col.ink3, 'stroke-width': 1.2 }, g);
       return g;
@@ -10710,10 +10711,16 @@ window.__pfStart();
 
     // the one who walks in
     const me = person(scene, col.lime, Z.k * 1.04);
-    const halo = make('circle', { cx: 0, cy: -36, r: 34, fill: 'none', stroke: col.lime, 'stroke-width': 1.5, opacity: 0 }, me.size);
     const scroll = make('g', {}, me.bob);
     make('rect', { x: 10, y: -46, width: 17, height: 22, rx: 2.5, fill: col.paper, stroke: col.lime, 'stroke-width': 1.6 }, scroll);
     make('path', { d: 'M13 -33 c2 -6 4 6 6 0 s3 -5 5 -1', fill: 'none', stroke: col.lime, 'stroke-width': 1.3, 'stroke-linecap': 'round' }, scroll);
+    // my arm: tucked into the body until I point at a pain point on the board
+    const SH = [9, -45], ARM = 34, ks = Z.k * 1.04;
+    const arm = make('line', { x1: SH[0], y1: SH[1], x2: SH[0], y2: SH[1] + 20, stroke: col.lime, 'stroke-width': 7, 'stroke-linecap': 'round' }, me.bob);
+    const aim = (p) => {
+      const a = Math.atan2(p[1] - (floor + 3 + SH[1] * ks), p[0] - (Z.stop + SH[0] * ks));
+      return { x2: SH[0] + Math.cos(a) * ARM, y2: SH[1] + Math.sin(a) * ARM };
+    };
     const flying = make('g', {}, scene);
     make('rect', { x: -8.5, y: -11, width: 17, height: 22, rx: 2.5, fill: col.paper, stroke: col.lime, 'stroke-width': 1.6 }, flying);
     make('path', { d: 'M-5 2 c2 -6 4 6 6 0 s3 -5 5 -1', fill: 'none', stroke: col.lime, 'stroke-width': 1.3, 'stroke-linecap': 'round' }, flying);
@@ -10770,9 +10777,11 @@ window.__pfStart();
       tl.to(m.drift, { x: 0, duration: 1.7, ease: 'power2.inOut' }, at);
       tl.to(m.bob, { y: -4, duration: 0.15, yoyo: true, repeat: 11, ease: 'sine.inOut' }, at);
     });
-    tl.to(halo, { opacity: 0.5, duration: 0.4 }, T.gather + 1.6);
 
-    // 6. two snags show up while it is still cheap to fix
+    // 6. two snags show up while it is still cheap to fix, and I point each one out
+    tl.to(arm, { attr: aim(pts[1]), duration: 0.35, ease: 'back.out(1.6)' }, T.snag - 0.35);
+    tl.to(arm, { attr: aim(pts[3]), duration: 0.3, ease: 'power2.inOut' }, T.snag + 0.45);
+    tl.to(arm, { attr: { x2: SH[0], y2: SH[1] + 20 }, duration: 0.3, ease: 'power2.in' }, T.fix + 0.15);
     [1, 3].forEach((ni, k) => {
       const at = T.snag + k * 0.5, s = stops[ni];
       tl.to(s.c, { attr: { fill: col.sig, stroke: col.sig }, duration: 0.2 }, at);
