@@ -155,7 +155,7 @@
     {
       id: 'hobbies', chip: 'Off the clock',
       keys: ['hobbies', 'hobby', 'free time', 'spare time', 'weekends', 'fun', 'interests', 'outside work', 'photography', 'photographer', 'camera', 'drone', 'video', 'film', 'filmmaker', 'videography', 'bcg', 'nokia', 'freelance'],
-      a: '<p>He spends weekends behind a camera. He’s a photographer, video editor, drone pilot and AI filmmaker, for clients like <b>Boston Consulting Group</b>, <b>Nokia</b> and major event companies.</p><p>He also loves games, open source software and tinkering: he roots his Android phone and plays with mods.</p>',
+      a: '<p>He spends weekends behind a camera. He’s a photographer, video editor, drone pilot and AI filmmaker, for clients like <b>Boston Consulting Group</b>, <b>Nokia</b> and major event companies. He’s just as happy exploring and capturing unique landscapes.</p><p>He also loves games, open source software and tinkering: he roots his Android phone and plays with mods.</p>',
       acts: [{ label: 'Off the clock', href: '#/play' }],
       next: ['games', 'vr', 'values']
     },
