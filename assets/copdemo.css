@@ -46,3 +46,4 @@
 .cop-note{margin:0;font-size:12px;color:var(--c-ink3)}
 @media (max-width:640px){.cop-row{grid-template-columns:1fr}.cop-top{flex-direction:column;align-items:stretch}.cop-seg{justify-content:stretch}.cop-seg button{flex:1}}
 .cop.is-bust .cop-set{color:var(--c-ink)}.cop.is-bust .cop-setv{text-decoration:line-through}.cop.is-bust .cop-set svg{display:none}
+.cop-lights rect{opacity:0}.cop.is-bust .cop-lights rect{opacity:1}

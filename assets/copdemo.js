@@ -3,11 +3,9 @@
    Illustration only, not production logic. Mount: <div data-copdemo></div> */
 (function () {
   'use strict';
-  var BODY = 'M6 30 Q4 22 14 20 L34 18 L48 6 Q52 3 58 3 L80 3 Q86 3 90 8 L100 18 Q110 19 112 26 L112 32 Q112 34 110 34 L8 34 Q6 34 6 30Z';
-  var WIN = '<path d="M38 18 L50 8 L66 8 L66 18Z" fill="#9fb3c2" opacity=".85"/><path d="M70 8 L84 8 Q87 8 89 11 L95 18 L70 18Z" fill="#9fb3c2" opacity=".85"/>';
-  var WHEELS = '<circle cx="28" cy="34" r="9" fill="#111"/><circle cx="28" cy="34" r="3.5" fill="#777"/><circle cx="90" cy="34" r="9" fill="#111"/><circle cx="90" cy="34" r="3.5" fill="#777"/>';
   var TT = '<svg viewBox="0 0 9 18" aria-hidden="true"><circle cx="4.5" cy="4.5" r="4" fill="currentColor"/><rect x="3.5" y="8" width="2" height="9" rx="1" fill="currentColor"/></svg>';
-  var SIM = 1.5, PPM = 7, CAR_X = 150, CAR_MID = CAR_X + 56, LANE_Y = 146, SHOULDER_Y = 30;
+  var SIM = 1.5, PPM = 7, CAR_X = 150, CAR_W = 120, CAR_H = 65, COP_W = 150, COP_H = 62, CAR_MID = CAR_X + CAR_W / 2, LANE_Y = 192 - CAR_H, SHOULDER_Y = 74 - CAR_H, COP_Y = 74 - COP_H;
+  var BASE = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^/]*$/, '') : 'assets/';
   var SIGN_AT = 70, COP_AT = 205;
 
   function tpl() {
@@ -16,16 +14,16 @@
       '<button type="button" data-m="off" aria-pressed="false">Regular cruise</button>' +
       '<button type="button" data-m="auto" aria-pressed="true">Intelligent cruise, Auto</button></div>' +
       '<div class="cop-btns"><button type="button" class="cop-btn cop-res" disabled>RES</button><button type="button" class="cop-btn cop-play">Play</button></div></div>' +
-      '<div class="cop-scene"><svg viewBox="0 0 800 210" role="img" aria-label="Side view of a road. A speed sign drops the limit from 70 to 50, and a police car waits on the shoulder.">' +
-      '<rect width="800" height="210" fill="#0D0E09"/><rect y="0" width="800" height="76" fill="#15170f"/>' +
-      '<rect class="cop-glow" width="800" height="210"/>' +
+      '<div class="cop-scene"><svg viewBox="0 -40 800 250" role="img" aria-label="Side view of a road. A speed sign drops the limit from 70 to 50, and a police car waits on the shoulder.">' +
+      '<rect y="-40" width="800" height="250" fill="#0D0E09"/><rect y="-40" width="800" height="116" fill="#15170f"/>' +
+      '<rect class="cop-glow" y="-40" width="800" height="250"/>' +
       '<rect y="76" width="800" height="126" fill="#202219"/><rect y="76" width="800" height="3" fill="rgba(244,243,232,.35)"/><rect y="199" width="800" height="3" fill="rgba(244,243,232,.35)"/>' +
       '<line class="cop-lane" x1="0" y1="138" x2="800" y2="138"/>' +
       '<g class="cop-sign-g"><rect x="-2" y="20" width="4" height="56" fill="#8a8a80"/><circle r="19" cy="22" fill="#fff" stroke="#D62E2E" stroke-width="6"/><text y="29" text-anchor="middle" font-family="Cabinet Grotesk,Switzer,sans-serif" font-weight="800" font-size="19" fill="#111">50</text></g>' +
-      '<g class="cop-cop"><g><path d="' + BODY + '" fill="#f4f3e8"/><path d="M34 18 L100 18 Q108 19 110 24 L110 30 L8 30 L8 24 Q10 20 14 20Z" fill="#111"/>' + WIN + WHEELS +
-      '<g class="cop-lights"><rect class="r" x="52" y="-4" width="11" height="6" rx="2"/><rect class="b" x="64" y="-4" width="11" height="6" rx="2"/></g></g>' +
-      '<g class="cop-radar"><rect x="-6" y="-34" width="126" height="24" rx="12" fill="#3a4046"/><text class="cop-radar-t" x="57" y="-17" text-anchor="middle" font-family="Tabular,ui-monospace,monospace" font-size="12" fill="#fff">RADAR</text></g></g>' +
-      '<g class="cop-car" transform="translate(' + CAR_X + ' ' + LANE_Y + ')"><path d="' + BODY + '" fill="#e9edf0" stroke="#7EDB5A" stroke-width="2"/>' + WIN + WHEELS + '</g>' +
+      '<g class="cop-cop"><image href="' + BASE + 'copdemo-police.webp" width="' + COP_W + '" height="' + COP_H + '"/>' +
+      '<g class="cop-lights"><rect class="b" x="59" y="0.5" width="9.4" height="4" rx="1.5"/><rect class="r" x="68.4" y="0.5" width="9.4" height="4" rx="1.5"/></g>' +
+      '<g class="cop-radar"><rect x="12" y="-34" width="126" height="24" rx="12" fill="#3a4046"/><text class="cop-radar-t" x="75" y="-17" text-anchor="middle" font-family="Tabular,ui-monospace,monospace" font-size="12" fill="#fff">RADAR</text></g></g>' +
+      '<g class="cop-car" transform="translate(' + CAR_X + ' ' + LANE_Y + ')"><image href="' + BASE + 'copdemo-jeep.webp" width="' + CAR_W + '" height="' + CAR_H + '"/></g>' +
       '</svg></div>' +
       '<div class="cop-row"><div class="cop-hud" aria-hidden="true">' +
       '<div class="cop-toast"><span class="cop-sign">50</span><span>Speed zone detected. To resume previous set speed, press RES</span></div>' +
@@ -47,7 +45,7 @@
     function msg(tag, text, cls) { say.className = 'cop-say' + (cls ? ' ' + cls : ''); say.innerHTML = '<span class="cop-tag">' + tag + '</span><span>' + text + '</span>'; }
     function reset() {
       cancelAnimationFrame(raf); raf = 0;
-      S = { mode: root.dataset.mode || 'auto', t: 0, dist: 0, v: 70, tv: 70, limit: 70, set: 70, prev: 70, passed: false, until: 0, checked: false, bust: false, copY: SHOULDER_Y, carY: LANE_Y, end: 0, running: false };
+      S = { mode: root.dataset.mode || 'auto', t: 0, dist: 0, v: 70, tv: 70, limit: 70, set: 70, prev: 70, passed: false, until: 0, checked: false, bust: false, copY: COP_Y, carY: LANE_Y, end: 0, running: false };
       root.classList.remove('is-bust'); toast.classList.remove('on'); radar.classList.remove('on');
       resB.disabled = true; resB.classList.remove('is-hot'); playB.textContent = 'Play';
       msg('Ready', 'Cruising at 70 in a 70 zone. A school zone is coming up, with an officer on the shoulder.');
@@ -57,7 +55,7 @@
       lane.style.strokeDashoffset = (S.dist * PPM % 48).toFixed(1);
       var sx = CAR_MID + (SIGN_AT - S.dist) * PPM;
       sign.setAttribute('transform', 'translate(' + sx.toFixed(1) + ' 0)');
-      var cw = S.bust ? S.dist - 18 : COP_AT, cx = CAR_MID + (cw - S.dist) * PPM - 59;
+      var cw = S.bust ? S.dist - 21 : COP_AT, cx = CAR_MID + (cw - S.dist) * PPM - COP_W / 2;
       cop.setAttribute('transform', 'translate(' + cx.toFixed(1) + ' ' + S.copY.toFixed(1) + ')');
       if (!S.checked && cx - CAR_X < 300 && cx > CAR_X) { radar.classList.add('on'); radarT.textContent = 'RADAR ' + Math.round(S.v) + ' km/h'; }
       q('.cop-car').setAttribute('transform', 'translate(' + CAR_X + ' ' + S.carY.toFixed(1) + ')');
