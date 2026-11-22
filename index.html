@@ -4023,6 +4023,17 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
 }
 .huddle__stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 @media (max-width: 720px) { .huddle__stage { aspect-ratio: 640 / 400; } }
+
+/* V19: next project, topography revealed by the ripple (no ring lines) */
+@property --tr{syntax:"<length>";inherits:false;initial-value:0px}
+.tread-host .rip{display:none!important}
+.tread-host .topo{position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("assets/topo-reveal.svg") center/cover no-repeat;opacity:.7;--tr:0px;
+  -webkit-mask-image:radial-gradient(circle at var(--rx) var(--ry),rgba(0,0,0,.24) 0,rgba(0,0,0,.24) calc(var(--tr) - 260px),#000 calc(var(--tr) - 40px),transparent var(--tr));
+  mask-image:radial-gradient(circle at var(--rx) var(--ry),rgba(0,0,0,.24) 0,rgba(0,0,0,.24) calc(var(--tr) - 260px),#000 calc(var(--tr) - 40px),transparent var(--tr));
+  transition:--tr .5s ease}
+.tread-host.is-lit .topo{--tr:2600px;transition:--tr 1.6s cubic-bezier(.3,.1,.25,1)}
+[data-theme="mst"] .topo{filter:invert(1)}
+@media (prefers-reduced-motion:reduce){.tread-host .topo{display:none}}
 </style>
 <script src="assets/analytics.js" defer></script>
 <link rel="stylesheet" href="assets/scout.css">
@@ -10560,6 +10571,7 @@ window.TechText = (container, props = {}) => {
   };
   // the flood starts where you enter: jump the centre there first, then let only the radius animate
   const light = (el, e) => {
+    if (!el.querySelector(':scope > .topo')) { const t = document.createElement('span'); t.className = 'topo'; t.setAttribute('aria-hidden', 'true'); el.appendChild(t); void getComputedStyle(t).getPropertyValue('--tr'); }
     el.classList.add('rip-snap'); aim(el, e);
     void getComputedStyle(el, '::after').clipPath;
     el.classList.remove('rip-snap');

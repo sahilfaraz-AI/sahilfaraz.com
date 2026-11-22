@@ -957,6 +957,24 @@ section::before{content:"";position:absolute;top:0;left:0;right:0;margin-inline:
 @media (max-width:900px){.vant{grid-template-columns:1fr}}
 .onepager .fcr{font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:#8a8878;margin-bottom:8px}
 @media (min-width:1200px){.nextproj{margin-left:-208px;padding-left:208px}}
+
+/* V19: next project, topography revealed by the ripple (no ring lines) */
+@property --tr{syntax:"<length>";inherits:false;initial-value:0px}
+.tread-host .rip{display:none!important}
+.tread-host .topo{position:absolute;inset:0;z-index:-1;pointer-events:none;background:url("assets/topo-reveal.svg") center/cover no-repeat;opacity:.7;--tr:0px;
+  -webkit-mask-image:radial-gradient(circle at var(--rx) var(--ry),rgba(0,0,0,.24) 0,rgba(0,0,0,.24) calc(var(--tr) - 260px),#000 calc(var(--tr) - 40px),transparent var(--tr));
+  mask-image:radial-gradient(circle at var(--rx) var(--ry),rgba(0,0,0,.24) 0,rgba(0,0,0,.24) calc(var(--tr) - 260px),#000 calc(var(--tr) - 40px),transparent var(--tr));
+  transition:--tr .5s ease}
+.tread-host.is-lit .topo{--tr:2600px;transition:--tr 1.6s cubic-bezier(.3,.1,.25,1)}
+[data-theme="mst"] .topo{filter:invert(1)}
+@media (prefers-reduced-motion:reduce){.tread-host .topo{display:none}}
+
+/* V19: north star toast centred under the speed panel, arrow up to the green set speed */
+.ns-toast{left:50%;transform:translateX(-50%);top:calc(100% + 24px)}
+.ns-toast::before,.ns-toast::after{content:none}
+.mc-set.ns-set{position:relative}
+.mc-set.ns-set::after{content:"";position:absolute;left:10px;top:calc(100% + 9px);width:2px;height:16px;background:var(--accent)}
+.mc-set.ns-set::before{content:"";position:absolute;left:5px;top:calc(100% + 2px);border:6px solid transparent;border-bottom:8px solid var(--accent);border-top:0}
 </style>
 <script src="assets/analytics.js" defer></script>
 <script>if(/[?&]draft\b/.test(location.search))document.documentElement.classList.add("draft")</script>
@@ -2117,6 +2135,7 @@ window.initCase=function(){
   };
   // the flood starts where you enter: jump the centre there first, then let only the radius animate
   const light = (el, e) => {
+    if (!el.querySelector(':scope > .topo')) { const t = document.createElement('span'); t.className = 'topo'; t.setAttribute('aria-hidden', 'true'); el.appendChild(t); void getComputedStyle(t).getPropertyValue('--tr'); }
     el.classList.add('rip-snap'); aim(el, e);
     void getComputedStyle(el, '::after').clipPath;
     el.classList.remove('rip-snap');
