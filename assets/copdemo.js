@@ -1,5 +1,5 @@
 /* Auto mode, on the road: a speed zone with an officer waiting.
-   Regular cruise holds its speed and gets pulled over; Auto mode follows the new limit.
+   Adaptive Cruise holds its speed and gets pulled over; Auto mode follows the new limit.
    Illustration only, not production logic. Mount: <div data-copdemo></div> */
 (function () {
   'use strict';
@@ -11,8 +11,8 @@
   function tpl() {
     return '' +
       '<div class="cop-top"><div class="cop-seg" role="group" aria-label="Cruise mode">' +
-      '<button type="button" data-m="off" aria-pressed="false">Regular cruise</button>' +
-      '<button type="button" data-m="auto" aria-pressed="true">Intelligent cruise, Auto</button></div>' +
+      '<button type="button" data-m="off" aria-pressed="false">Adaptive Cruise</button>' +
+      '<button type="button" data-m="auto" aria-pressed="true">Intelligent Cruise, Auto</button></div>' +
       '<div class="cop-btns"><button type="button" class="cop-btn cop-res" disabled>RES</button><button type="button" class="cop-btn cop-play">Play</button></div></div>' +
       '<div class="cop-scene"><svg viewBox="0 -40 800 250" role="img" aria-label="Side view of a road. A speed sign drops the limit from 70 to 50, and a police car waits on the shoulder.">' +
       '<rect y="-40" width="800" height="250" fill="#0D0E09"/><rect y="-40" width="800" height="116" fill="#15170f"/>' +
@@ -72,7 +72,7 @@
           S.prev = S.set; S.set = 50; S.tv = 50; S.until = S.t + 5 * SIM;
           toast.classList.add('on'); resB.disabled = false; resB.classList.add('is-hot');
           msg('Speed zone', 'Auto mode follows the new limit to 50. For five seconds, RES takes you back to 70.');
-        } else msg('Speed zone', 'The camera reads 50, but regular cruise holds 70.');
+        } else msg('Speed zone', 'The camera reads 50, but Adaptive Cruise holds 70.');
       }
       if (S.until && S.t >= S.until) { S.until = 0; toast.classList.remove('on'); resB.disabled = true; resB.classList.remove('is-hot'); if (S.set === 50) msg('Speed zone', 'Now cruising at 50, the legal limit.'); }
       var copMid = CAR_MID + (COP_AT - S.dist) * PPM;
