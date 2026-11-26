@@ -3120,6 +3120,7 @@ html { background: var(--paper); }
 body { background: var(--paper); color: var(--ink); font-family: var(--f-sans); font-size: 17px; line-height: 1.55; font-weight: 400; letter-spacing: -.003em; }
 @media (min-width: 2300px) { body { font-size: 18px; } }
 ::selection { background: var(--lime); color: #13140E; }
+[data-theme] ::selection { background: var(--accent, var(--lime)); color: #13140E; }
 :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; border-radius: 2px; }
 .hero :focus-visible, .contact :focus-visible, [data-theme] :focus-visible, .site-header :focus-visible { outline-color: var(--lime); }
 .mono { font-family: var(--f-mono); letter-spacing: .02em; }
@@ -4172,9 +4173,9 @@ header .site-nav .navdrop a.navdrop__row:hover, header .site-nav .navdrop a.navd
         <div class="spread__text">
           <p class="spread__where">Stellantis, in development</p>
           <h3 id="sp-icc" class="spread__title spread__title--long"><a href="#/cruise-control" data-cursor="Read the case study">Intelligent Cruise Control</a></h3>
-          <p class="spread__lede">The industry bet on cruise control that adopts the speed limit by itself. I knew the limit data was sometimes wrong, so I gave drivers a way back: one press returns to their previous speed.</p>
+          <p class="spread__lede">The brief asked for what competitors ship: cruise control that adopts the speed limit by itself. I asked what happens when the limit is wrong, and made the case for a way back: one press returns to the previous speed.</p>
           <dl class="facts facts--plate">
-            <div><dt>Role</dt><dd>Feature designer and owner of the spec</dd></div>
+            <div><dt>Role</dt><dd>UX Feature Lead, owner of the spec</dd></div>
             <div><dt>Tested</dt><dd>Global UX team vote, 30-driver simulator study</dd></div>
             <div><dt>Status</dt><dd>Spec released, in development</dd></div>
           </dl>
