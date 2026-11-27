@@ -8270,7 +8270,7 @@ window.TechText = (container, props = {}) => {
     if (!initial && h && !h.startsWith('#/')) return; // in-page anchors such as the skip link
     const r = parse();
     if (r.page === 'cruise-control') {
-      // V5: Intelligent Cruise Control lives on its own password-protected page
+      // Intelligent Cruise Control lives on its own page
       const dest = 'intelligent-cruise-control.html';
       if (initial || reduced()) { location.replace(dest); return; }
       const cs = curtainStyle['cruise-control'];
